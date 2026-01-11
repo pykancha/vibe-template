@@ -1,19 +1,32 @@
 # Web App Template
 
-This is a web-app starting template for our preferred stack, with first class native support for ai agents like you.
-This project has helpers for non-technical humans trying to build their ideas app with AI assistance.
+## Context
 
-See the current architecture of the this app in @TEMPLATE_ARCHITECTURE.md, try to stay in harmony and maintain the current architecture.
-Feel free to replace this initial template with user requested app IMPORTANT try to keep the stack technology same/github pages compatible.
+- This is a web-app starting template with first-class AI agent support
+- Designed for non-technical humans building apps with AI assistance
 
-When user says to use 'X' or 'X Skill' see .agent/skills folder for that name and read the SKILL.md file there.
-You'll use and refer to the .agent/skills folder to understand the pattern and workflows for building debugging refactoring the features.
+## Protocol
 
-If any command like pnpm, git, brew, vibe-launcher etc are not available go to .agent/skills/tools/SKILL.md to help user install them first.
+1. READ `@TEMPLATE_ARCHITECTURE.md` to understand current architecture; maintain harmony with it
+2. You MAY replace this template with user-requested app; MUST keep stack GitHub Pages compatible
+3. For AI API integrations (text/image/video generation) → `@.agent/skills/template-scripts/`
 
-Commit your changes often, when user says to experiment a project use worktree feature to add worktrees into root experiments/ folder and register the experiment with proper name in root @.vibe.launcher.json and run vibe-launcher.
+## Skill Routing
 
-For planning a new feature see .agent/skills/plan/SKILL.md
-For debugging see .agent/skills/debug/SKILL.md
-For code review see @.agent/review.md
-For asking chatgpt help see .agent/skills/debug/SKILL.md (last section)
+- When user says "use X" or "X Skill" → read `.agent/skills/<X>/SKILL.md`
+- Skills folder contains patterns/workflows for building, debugging, refactoring
+
+## Quick Reference
+
+| Task                                           | Location                                      |
+| ---------------------------------------------- | --------------------------------------------- |
+| Planning new feature                           | `.agent/skills/plan/SKILL.md`                 |
+| Debugging                                      | `.agent/skills/debug/SKILL.md`                |
+| Code review                                    | `.agent/skills/review/SKILL.md`               |
+| ChatGPT escalation                             | `.agent/skills/debug/SKILL.md` (last section) |
+| Missing tools (pnpm, git, brew, vibe-launcher) | `.agent/skills/tools/SKILL.md`                |
+
+## Git Hygiene
+
+- Commit changes often
+- For experiments: use git worktree in `experiments/` folder, register in `.vibe.launcher.json`, run `vibe-launcher`

@@ -1,24 +1,34 @@
-# Vibe Launcher Skill
+---
+name: vibe-launcher
+description: Build and configure the double-clickable macOS Launcher.app for dev servers.
+allowed-tools:
+  - bash
+  - read
+  - edit_file
+metadata:
+  version: "1.0"
+---
 
-A double-clickable macOS app that launches your dev servers with a web dashboard.
+# Vibe Launcher
 
-## Installation
+Double-clickable macOS app that launches dev servers with web dashboard.
 
-Check if installed:
+## Check/Install
+
 ```bash
 which vibe-launcher
 ```
 
-If not found, install via Homebrew:
+IF not found:
 ```bash
 brew install pykancha/tap/vibe-launcher
 ```
 
-If brew is not installed, read `.agent/skills/tools/SKILL.md` first.
+IF brew missing → read `.agent/skills/tools/SKILL.md`
 
 ## Configuration
 
-Read the project's `.vibe.launcher.json` to understand current setup:
+READ `.vibe.launcher.json`:
 
 ```json
 {
@@ -33,57 +43,49 @@ Read the project's `.vibe.launcher.json` to understand current setup:
 }
 ```
 
-Fields:
-- `name`: Entry label shown in dashboard
-- `start`: Shell command to run (e.g., `pnpm dev`, `npm run dev`)
-- `stop`: Optional stop command (empty = SIGTERM)
-- `ports`: Ports to monitor for status indicators
+| Field | Description |
+|-------|-------------|
+| `name` | Label shown in dashboard |
+| `start` | Shell command (e.g., `pnpm dev`) |
+| `stop` | Optional stop command (empty = SIGTERM) |
+| `ports` | Ports to monitor for status |
 
-Modify entries as needed for the project's dev servers.
+## Build
 
-## Building the Launcher
-
-From project root:
 ```bash
 vibe-launcher build
 ```
 
-Creates `Launcher.app` in the project directory.
+Creates `Launcher.app` in project root.
 
-## Launcher.app Anatomy
+## Launcher.app Structure
 
 ```
 Launcher.app/
   Contents/
-    MacOS/launcher      # Shell script that runs vibe-launcher
+    MacOS/launcher       # Shell script running vibe-launcher
     Resources/
-      launch.html       # Dashboard UI (customizable!)
-      AGENTS.md         # API documentation
-      openapi.json      # OpenAPI 3.0 spec
-      AppIcon.icns      # App icon
-    Info.plist          # macOS bundle metadata
+      launch.html        # Dashboard UI (customizable)
+      AGENTS.md          # API documentation
+      openapi.json       # OpenAPI 3.0 spec
+      AppIcon.icns       # App icon
+    Info.plist           # macOS bundle metadata
 ```
 
-Users can edit `launch.html` to customize their dashboard - changes take effect on browser refresh.
+Users can edit `launch.html` - changes apply on browser refresh.
 
-## Launching for User
+## Launch
 
-Option 1 - Open programmatically:
 ```bash
-open Launcher.app
+open Launcher.app                 # Open programmatically
+open -R Launcher.app              # Reveal in Finder for manual launch
 ```
 
-Option 2 - Open in Finder for manual launch:
-```bash
-open -R Launcher.app
-```
-Then tell user: "I've opened Finder showing the Launcher. Double-click it to start your dev servers."
-
-The launcher opens a browser to `http://localhost:9876` with controls to start/stop/restart entries and view logs.
+Dashboard at `http://localhost:9876` with start/stop/restart controls and logs.
 
 ## Workflow Summary
 
 1. Check/install vibe-launcher
-2. Read and modify `.vibe.launcher.json` for project needs
+2. Read/modify `.vibe.launcher.json`
 3. Run `vibe-launcher build`
-4. Open `Launcher.app` for user or show in Finder
+4. Open `Launcher.app` or reveal in Finder for user

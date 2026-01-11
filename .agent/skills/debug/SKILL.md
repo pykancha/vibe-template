@@ -1,19 +1,52 @@
-# Debugging Protocol
+---
+name: debug
+description: Debugging protocol for systematic bug investigation and resolution.
+allowed-tools:
+  - bash
+  - read
+  - grep
+  - finder
+metadata:
+  version: "1.0"
+---
 
-IMPORTANT: Go through the protocol one by one without skipping
+# Debug Protocol
 
-## Step 1 Inquiry
-- Ask as much from the user that they can answer, its okay if they don't have all info but ask to extract as much as they know about how, when, where, screenshots, logs (where they can look) etc reproduction steps first.
+EXECUTE steps sequentially. DO NOT skip.
 
-## Step 2 Diagnosis
-- Go through the codebase once you have proper idea of where it might happen.
-- Work through hypothesis and use subagents to read the heavy codebase and once they filter down potential candidates read those narrowed files yourself, always ask your subagent to report back file:line no along with summary
-- Hypothesize and fix, add logs to prove that your hypothsis is correct,
+## Step 1: Context Gathering
 
-- Refactor the codebase if necessary to follow @TEMPLATE_ARCHITECTURE.md this has massive different in you able to trigger the app, see logs and examine state, do whatever changes needed to utilize this system to the fullest!
+1. READ `@TEMPLATE_ARCHITECTURE.md` for project structure
+2. CHECK recent commits for context on recent changes
+3. DETERMINE if app is running with WebSocket interface available
+   - IF YES: stream logs + ask user to reproduce issue
+   - IF NO: consider using `@.agent/skills/browser-tools/` skill
 
-- Commit your changes always after a fix is verified and remove all your logs during the debugging process, keep permanent logs only if they are veryyy useful for future and are in very tricky and error-prone codebase.
+## Step 2: User Inquiry
 
-## Step 3 Ask help
-- Sometimes you mgiht not be able to solve bugs no matter how hard you try.
-- Collect all you know about he original problem/issue context, your analysis, your trials and findings and analysis and surrounding code context and prepare a long issue-report.md and ask user to open chatgpt web extended thinking and paste that file/drag drop that file there to ask it.
+EXTRACT from user (accept partial answers):
+- Reproduction steps
+- Screenshots/logs
+- When/where issue occurs
+- Error messages
+
+PREFER WebSocket log streaming over browser automation when app is running.
+
+## Step 3: Diagnosis
+
+1. FORM hypothesis based on gathered info
+2. USE subagents to scan codebase; they MUST report `file:lineNo` + summary
+3. ADD temporary logs to verify hypothesis
+4. IF architecture blocks introspection → refactor to align with `@TEMPLATE_ARCHITECTURE.md`
+
+## Step 4: Resolution
+
+1. VERIFY fix works
+2. COMMIT changes (semantic commit)
+3. REMOVE debug logs (keep only high-value permanent logs in error-prone code)
+
+## Step 5: Escalation (if stuck)
+
+1. COMPILE: original issue, analysis, trials, findings, surrounding code
+2. WRITE to `.agent/plans/issue-report.md`
+3. ASK user to paste file into ChatGPT web with extended thinking enabled
