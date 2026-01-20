@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenRouter Free Models</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-950 text-slate-100">
+    <main class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10">
+      <header class="flex flex-col gap-3">
+        <p class="text-xs uppercase text-slate-400">
+          OpenRouter Models API
+        </p>
+        <h1 class="text-balance text-3xl font-semibold">Free Models Console</h1>
+        <p class="text-pretty text-sm text-slate-300">
+          Fetch and inspect the free models list. The API key stays in your
+          browser session only.
+        </p>
+      </header>
+
+      <section class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <div class="grid gap-4 md:grid-cols-3">
+          <label class="flex flex-col gap-2 text-sm">
+            <span class="text-slate-300">OpenRouter API key (optional)</span>
+            <input
+              id="apiKey"
+              type="password"
+              placeholder="sk-or-..."
+              class="rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100"
+            />
+          </label>
+
+          <label class="flex flex-col gap-2 text-sm">
+            <span class="text-slate-300">Category</span>
+            <select
+              id="category"
+              class="rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100"
+            >
+              <option value="">All</option>
+              <option value="programming">Programming</option>
+              <option value="roleplay">Roleplay</option>
+              <option value="marketing">Marketing</option>
+              <option value="marketing/seo">Marketing / SEO</option>
+              <option value="technology">Technology</option>
+              <option value="science">Science</option>
+              <option value="translation">Translation</option>
+              <option value="legal">Legal</option>
+              <option value="finance">Finance</option>
+              <option value="health">Health</option>
+              <option value="trivia">Trivia</option>
+              <option value="academia">Academia</option>
+            </select>
+          </label>
+
+          <label class="flex flex-col gap-2 text-sm">
+            <span class="text-slate-300">Max list size</span>
+            <input
+              id="limit"
+              type="number"
+              min="1"
+              max="500"
+              value="50"
+              class="rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100"
+            />
+          </label>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            id="load"
+            class="rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900"
+          >
+            Load free models
+          </button>
+          <label
+            class="flex items-center gap-2 rounded-full border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-slate-300"
+          >
+            <input id="showRaw" type="checkbox" class="size-3" />
+            Show raw JSON
+          </label>
+          <p id="status" class="text-xs text-slate-400">Status: idle</p>
+          <p id="pricingStatus" class="text-xs text-slate-400">
+            Pricing: models.dev not loaded
+          </p>
+        </div>
+
+        <p id="error" class="mt-3 text-sm text-amber-300"></p>
+
+        <div class="mt-4 grid gap-3 text-xs text-slate-300 md:grid-cols-3">
+          <div class="rounded-xl border border-slate-800 bg-slate-950 p-3">
+            <p class="text-slate-400">Models loaded</p>
+            <p id="count" class="tabular-nums text-lg text-slate-100">0</p>
+          </div>
+          <div class="rounded-xl border border-slate-800 bg-slate-950 p-3">
+            <p class="text-slate-400">Free models</p>
+            <p id="freeCount" class="tabular-nums text-lg text-slate-100">0</p>
+          </div>
+          <div class="rounded-xl border border-slate-800 bg-slate-950 p-3">
+            <p class="text-slate-400">Last updated</p>
+            <p id="timestamp" class="tabular-nums text-lg text-slate-100">—</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="flex flex-col gap-4">
+        <div id="list" class="grid gap-4"></div>
+        <pre
+          id="raw"
+          class="hidden max-h-72 overflow-auto rounded-2xl border border-dashed border-slate-800 bg-slate-950 p-4 text-xs text-slate-300"
+        ></pre>
+      </section>
+    </main>
+
+    <script type="module">
+      import { createClient } from "./index.js";
+
+      const apiKeyInput = document.getElementById("apiKey");
+      const categoryInput = document.getElementById("category");
+      const limitInput = document.getElementById("limit");
+      const showRawInput = document.getElementById("showRaw");
+      const statusEl = document.getElementById("status");
+      const pricingStatusEl = document.getElementById("pricingStatus");
+      const countEl = document.getElementById("count");
+      const freeCountEl = document.getElementById("freeCount");
+      const timestampEl = document.getElementById("timestamp");
+      const listEl = document.getElementById("list");
+      const rawEl = document.getElementById("raw");
+      const errorEl = document.getElementById("error");
+      const loadBtn = document.getElementById("load");
+
+      let lastPayload = null;
+
+      const setStatus = (text) => {
+        statusEl.textContent = `Status: ${text}`;
+      };
+
+      const formatDate = (value) => {
+        if (!value) return "—";
+        const date = new Date(value);
+        if (Number.isNaN(date.valueOf())) return "—";
+        return date.toLocaleString();
+      };
+
+      const renderRaw = (payload) => {
+        if (!showRawInput.checked) {
+          rawEl.classList.add("hidden");
+          rawEl.textContent = "";
+          return;
+        }
+        rawEl.classList.remove("hidden");
+        rawEl.textContent = JSON.stringify(payload, null, 2);
+      };
+
+      const renderList = (models) => {
+        listEl.innerHTML = "";
+        if (!models.length) {
+          const empty = document.createElement("div");
+          empty.className =
+            "rounded-2xl border border-slate-800 bg-slate-900 p-6 text-sm text-slate-300";
+          empty.innerHTML = `
+            <p class="text-pretty">No models returned. Try clearing the category filter.</p>
+            <button id="resetFilters" class="mt-3 rounded-xl bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-900">Clear filters</button>
+          `;
+          listEl.appendChild(empty);
+          empty.querySelector("#resetFilters").addEventListener("click", () => {
+            categoryInput.value = "";
+            loadBtn.click();
+          });
+          return;
+        }
+
+        models.forEach((model) => {
+          const card = document.createElement("article");
+          card.className =
+            "rounded-2xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-200";
+
+          const pricing = model.pricing || {};
+          const architecture = model.architecture || {};
+          const topProvider = model.top_provider || {};
+          const quality = model.pricing_quality || null;
+          const qualityLabel = quality
+            ? `${quality.source} avg ${quality.avg}`
+            : "n/a";
+          const qualityProvider = quality
+            ? Array.isArray(quality.provider)
+              ? quality.provider.join(", ")
+              : quality.provider
+            : "n/a";
+
+          card.innerHTML = `
+            <div class="flex flex-col gap-2">
+              <div class="flex flex-col gap-1">
+                <h2 class="text-balance text-lg font-semibold text-slate-100">${
+                  model.name || model.id
+                }</h2>
+                <p class="text-xs text-slate-400">${model.id}</p>
+              </div>
+              <div class="grid gap-2 text-xs text-slate-300 md:grid-cols-3">
+                <div>
+                  <p class="text-slate-400">Context length</p>
+                  <p class="tabular-nums text-slate-100">${
+                    model.context_length ?? "—"
+                  }</p>
+                </div>
+                <div>
+                  <p class="text-slate-400">Pricing (prompt / completion)</p>
+                  <p class="tabular-nums text-slate-100">${
+                    pricing.prompt ?? "—"
+                  } / ${pricing.completion ?? "—"}</p>
+                </div>
+                <div>
+                  <p class="text-slate-400">Tokenizer</p>
+                  <p class="text-slate-100">${
+                    architecture.tokenizer ?? "—"
+                  }</p>
+                </div>
+                <div>
+                  <p class="text-slate-400">Modalities</p>
+                  <p class="text-slate-100">${
+                    architecture.input_modalities
+                      ? architecture.input_modalities.join(", ")
+                      : "—"
+                  }</p>
+                </div>
+                <div>
+                  <p class="text-slate-400">Top provider context</p>
+                  <p class="tabular-nums text-slate-100">${
+                    topProvider.context_length ?? "—"
+                  }</p>
+                </div>
+                <div>
+                  <p class="text-slate-400">Created</p>
+                  <p class="text-slate-100">${formatDate(
+                    (model.created ?? 0) * 1000
+                  )}</p>
+                </div>
+                <div>
+                  <p class="text-slate-400">Price rank</p>
+                  <p class="tabular-nums text-slate-100">${
+                    model.pricing_rank ?? "—"
+                  }</p>
+                </div>
+                <div>
+                  <p class="text-slate-400">Price source</p>
+                  <p class="text-slate-100">${qualityLabel}</p>
+                </div>
+                <div>
+                  <p class="text-slate-400">Price provider</p>
+                  <p class="text-slate-100">${qualityProvider}</p>
+                </div>
+              </div>
+              <div class="text-xs text-slate-300">
+                <p class="text-slate-400">Supported parameters</p>
+                <p class="text-pretty">${
+                  model.supported_parameters
+                    ? model.supported_parameters.join(", ")
+                    : "—"
+                }</p>
+              </div>
+              <details class="rounded-xl border border-slate-800 bg-slate-950 p-3">
+                <summary class="cursor-pointer text-xs text-slate-300">All fields</summary>
+                <pre class="mt-3 text-xs text-slate-300">${JSON.stringify(
+                  model,
+                  null,
+                  2
+                )}</pre>
+              </details>
+            </div>
+          `;
+
+          listEl.appendChild(card);
+        });
+      };
+
+      showRawInput.addEventListener("change", () => renderRaw(lastPayload));
+
+      loadBtn.addEventListener("click", async () => {
+        setStatus("loading");
+        errorEl.textContent = "";
+        listEl.innerHTML = "";
+
+        try {
+          const apiKey = apiKeyInput.value.trim();
+          const client = createClient({ apiKey });
+          const payload = await client.rankFreeModels({
+            category: categoryInput.value || undefined,
+          });
+
+          lastPayload = payload;
+
+          const models = payload.data || [];
+          const limit = Number(limitInput.value) || models.length;
+          const trimmed = models.slice(0, limit);
+
+          countEl.textContent = String(trimmed.length);
+          freeCountEl.textContent = String(models.length);
+          timestampEl.textContent = new Date().toLocaleTimeString();
+          pricingStatusEl.textContent = "Pricing: models.dev loaded";
+
+          renderList(trimmed);
+          renderRaw(payload);
+          setStatus("loaded");
+        } catch (err) {
+          console.error(err);
+          setStatus("error");
+          errorEl.textContent = err?.message || "Failed to load models.";
+          pricingStatusEl.textContent = "Pricing: unavailable";
+          renderRaw(lastPayload);
+        }
+      });
+    </script>
+  </body>
+</html>

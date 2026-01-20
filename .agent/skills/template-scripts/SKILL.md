@@ -17,20 +17,24 @@ Reference templates for AI API integrations. ASK user for required credentials.
 
 ### Text/Chat Generation
 
-| Template | Credentials |
-|----------|-------------|
+| Template                     | Credentials          |
+| ---------------------------- | -------------------- |
 | `openrouter-text-scripts.md` | `OPENROUTER_API_KEY` |
+
+### Free OpenRouter Models Usage
+
+See @openrouter-free folder inside template-scripts
 
 ### Image Generation
 
-| Template | Credentials |
-|----------|-------------|
-| `openrouter-image-scripts.md` | `OPENROUTER_API_KEY` |
-| `geminiService.ts` | (style reference variant) |
+| Template                      | Credentials               |
+| ----------------------------- | ------------------------- |
+| `openrouter-image-scripts.md` | `OPENROUTER_API_KEY`      |
+| `geminiService.ts`            | (style reference variant) |
 
 ### Video Generation
 
-| Template | Credentials | Models |
-|----------|-------------|--------|
-| `kie-video-scripts.md` | `KIE_API_KEY` | veo3, veo3-fast, sora-2, kling-2.5 |
-| `vertex-video-scripts.md` | `GOOGLE_APPLICATION_CREDENTIALS`, `VERTEX_PROJECT`, `VERTEX_LOCATION` | veo-3-fast, veo-3-quality, veo-2 |
+| Template                  | Credentials                                                           | Models                             |
+| ------------------------- | --------------------------------------------------------------------- | ---------------------------------- |
+| `kie-video-scripts.md`    | `KIE_API_KEY`                                                         | veo3, veo3-fast, sora-2, kling-2.5 |
+| `vertex-video-scripts.md` | `GOOGLE_APPLICATION_CREDENTIALS`, `VERTEX_PROJECT`, `VERTEX_LOCATION` | veo-3-fast, veo-3-quality, veo-2   |
