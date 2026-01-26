@@ -4,11 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "VITE_ASSIST=1 vite",
+    "dev": "concurrently \"pnpm assist\" \"pnpm dev:app\"",
+    "dev:app": "VITE_ASSIST=1 vite",
     "dev:solo": "vite",
     "assist": "node src/devtools/server.js",
-    "dev:full": "concurrently \"pnpm assist\" \"pnpm dev\"",
     "vibe:doctor": "node scripts/vibe-doctor.mjs",
+    "check": "pnpm vibe:doctor && pnpm lint && pnpm build",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
