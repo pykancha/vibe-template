@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"pnpm assist\" \"pnpm dev:app\"",
+    "dev:full": "concurrently \"pnpm assist\" \"pnpm dev:app\"",
     "dev:app": "VITE_ASSIST=1 vite",
     "dev:solo": "vite",
     "assist": "node src/devtools/server.js",
