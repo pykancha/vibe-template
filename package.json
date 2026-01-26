@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently \"pnpm assist\" \"pnpm dev:app\"",
     "dev:full": "concurrently \"pnpm assist\" \"pnpm dev:app\"",
-    "dev:app": "VITE_ASSIST=1 vite",
+    "dev:app": "cross-env VITE_ASSIST=1 vite",
     "dev:solo": "vite",
     "assist": "node src/devtools/server.js",
     "vibe:doctor": "node scripts/vibe-doctor.mjs",
@@ -44,6 +44,7 @@
     "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^5.1.1",
     "concurrently": "^9.2.1",
+    "cross-env": "^7.0.3",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
