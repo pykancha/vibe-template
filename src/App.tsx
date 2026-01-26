@@ -1,11 +1,14 @@
 import './index.css'
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Route, Routes, Link } from 'react-router-dom'
 import { useStore } from '@/store'
 import { DevAssistant, connectAssist } from '@/devtools'
 
 function Home() {
-  const { theme, setTheme, user, setUser } = useStore()
+  const { theme, setTheme, user, setUser, todos, addTodo, toggleTodo, removeTodo, clearTodos } = useStore()
+  const [text, setText] = useState('')
+
+  const doneCount = useMemo(() => todos.filter((t) => t.done).length, [todos])
 
   return (
     <main className="space-y-6">
@@ -35,6 +38,61 @@ function Home() {
             )}
           </div>
         </div>
+      </section>
+
+      <section className="p-6 bg-zinc-900 rounded-lg border border-zinc-800">
+        <h2 className="text-xl font-semibold mb-2">Todos</h2>
+        <p className="text-zinc-400 mb-4">
+          {doneCount}/{todos.length} done
+        </p>
+
+        <form
+          className="flex gap-2 mb-4"
+          onSubmit={(e) => {
+            e.preventDefault()
+            addTodo(text)
+            setText('')
+          }}
+        >
+          <input
+            className="flex-1 px-3 py-2 rounded bg-zinc-950 border border-zinc-800"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Add a todo"
+          />
+          <button
+            type="submit"
+            className="px-3 py-2 bg-zinc-800 rounded hover:bg-zinc-700 transition"
+          >
+            Add
+          </button>
+          <button
+            type="button"
+            onClick={() => clearTodos()}
+            className="px-3 py-2 bg-zinc-800 rounded hover:bg-zinc-700 transition"
+          >
+            Clear
+          </button>
+        </form>
+
+        <ul className="space-y-2">
+          {todos.map((t) => (
+            <li key={t.id} className="flex items-center gap-3">
+              <button
+                className="flex-1 text-left px-3 py-2 rounded bg-zinc-950 border border-zinc-800 hover:border-zinc-700"
+                onClick={() => toggleTodo(t.id)}
+              >
+                <span className={t.done ? 'line-through text-zinc-500' : ''}>{t.text}</span>
+              </button>
+              <button
+                className="px-3 py-2 bg-zinc-800 rounded hover:bg-zinc-700 transition"
+                onClick={() => removeTodo(t.id)}
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="p-6 bg-zinc-900 rounded-lg border border-zinc-800">

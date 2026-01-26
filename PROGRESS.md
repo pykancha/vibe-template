@@ -6,3 +6,4 @@
 - 2026-01-26: add GitHub Actions deploy workflow for GitHub Pages; update github skill doc; verified with pnpm check. Status: done.
 - 2026-01-26: add missing TODO.md + SPEC.md control files; set P0 task to keep these maintained. Status: done.
 - 2026-01-26: add minimal automated test runner (Vitest + Testing Library) and wire into pnpm check (doctor+lint+test+build). Status: done.
+- 2026-01-26: add example feature: todos in Zustand store + UI + test; registered dev commands (addTodo/toggleTodo/clearTodos). Verified via pnpm check. Status: done.
