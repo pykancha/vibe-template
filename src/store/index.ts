@@ -20,13 +20,20 @@ const initialState = {
   theme: 'dark' as const,
 };
 
+function applyTheme(theme: AppState['theme']) {
+  if (typeof document === 'undefined') return;
+  document.documentElement.classList.remove('light', 'dark');
+  document.documentElement.classList.add(theme);
+}
+
+applyTheme(initialState.theme);
+
 export const useStore = create<AppState>((set) => ({
   ...initialState,
-  
+
   setUser: (user) => set({ user }),
   setTheme: (theme) => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme);
+    applyTheme(theme);
     set({ theme });
   },
   reset: () => set(initialState),

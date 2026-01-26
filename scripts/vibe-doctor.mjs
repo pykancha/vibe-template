@@ -26,8 +26,9 @@ async function main() {
   const viteConfig = await readText('vite.config.ts')
   const indexHtml = await readText('index.html')
   const assistServer = await readText('src/devtools/server.js')
+  const store = await readText('src/store/index.ts')
 
-  if (!viteConfig || !indexHtml || !assistServer) return
+  if (!viteConfig || !indexHtml || !assistServer || !store) return
 
   const hasBuildRelativeBase = /base\s*:\s*command\s*===\s*['"]build['"]\s*\?\s*['"]\.\/?['"]/m.test(
     viteConfig,
@@ -81,6 +82,13 @@ async function main() {
     fail('assist client should use wss when window.location.protocol is https:')
   } else {
     pass('assist client supports wss on https origins')
+  }
+
+  const appliesInitialTheme = /applyTheme\(initialState\.theme\)/.test(store)
+  if (!appliesInitialTheme) {
+    fail('store must apply initial theme on startup (e.g. applyTheme(initialState.theme))')
+  } else {
+    pass('store applies initial theme on startup')
   }
 
   if (process.exitCode) {
