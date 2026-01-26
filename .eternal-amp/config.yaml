@@ -1,0 +1,23 @@
+# Seconds to wait between iterations
+sleep: 3
+
+# Command to run amp (array of cmd + args)
+amp:
+  - "amps"
+  - "--visibility"
+  - "private"
+  - "--execute"
+  - "--stream-json"
+
+# Prefix added to thread title after each run (e.g. "(ralph): fix auth bug")
+thread_rename_prefix: "(ralph): "
+
+# Archive threads immediately after run to keep inbox clean
+thread_archive: true
+
+# If model outputs this phrase, loop stops gracefully (agent can self-terminate)
+safe_word: "STOP_RALPH"
+
+modes:
+  main:
+    prompt: prompts/main.md
