@@ -4,3 +4,4 @@
 - 2026-01-26: apply initial theme on startup (store applies initialState.theme immediately). Extended vibe:doctor to verify. Status: done.
 - 2026-01-26: add HashRouter skeleton (react-router-dom actually used; / and /about routes). Extend vibe:doctor (index.html entry script base-aware; HashRouter check). Status: done.
 - 2026-01-26: add GitHub Actions deploy workflow for GitHub Pages; update github skill doc; verified with pnpm check. Status: done.
+- 2026-01-26: add missing TODO.md + SPEC.md control files; set P0 task to keep these maintained. Status: done.
