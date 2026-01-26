@@ -1,29 +1,37 @@
-## Publishing to github pages
+## Publishing to GitHub Pages (recommended: GitHub Actions)
 
-## Install gh cli
+This template ships with a GitHub Pages workflow: `.github/workflows/deploy.yml`.
 
-See @../tools/SKILL.md (@.agent/skills/tools/SKILL.md) to install brew and gh cli
+### One-time setup (GitHub UI)
 
-### Authenticate
+1) Repo → Settings → Pages
+2) Build and deployment → Source: **GitHub Actions**
+
+### Deploy
+
+Push to `main`.
+
+### Verify locally before pushing
+
+```bash
+pnpm check
+```
+
+### Optional: gh CLI helpers
+
+If you want to automate setup:
 
 ```bash
 gh auth login
 ```
 
-### Link the local repo to remote
-
-See existing remotes, if none create a repository on github
+Create a repo (if needed):
 
 ```bash
-gh repo create <repo-name> ....
+gh repo create <repo-name> --private=false --source=. --push
 ```
 
-### Build
+Notes:
+- This template builds with Vite `base: "./"` for GH Pages subpaths (no repo-name config needed).
+- Default router is `HashRouter` so refresh works without rewrites.
 
-Run the build command of the project to build the dist folder
-
-### Publish
-
-```bash
-Create a gh-pages branch/worktree then push it to the remote
-```
