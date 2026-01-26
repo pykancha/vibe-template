@@ -8,6 +8,7 @@
     "dev:solo": "vite",
     "assist": "node src/devtools/server.js",
     "dev:full": "concurrently \"pnpm assist\" \"pnpm dev\"",
+    "vibe:doctor": "node scripts/vibe-doctor.mjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

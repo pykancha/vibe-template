@@ -11,7 +11,6 @@ async function urlToDataUrl(url: string): Promise<string> {
     );
   }
   const blob = await response.blob();
-  const mimeType = blob.type;
 
   const base64Data = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
