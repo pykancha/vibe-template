@@ -39,24 +39,78 @@ const wss = new WebSocketServer({ server: httpServer });
 let latestContext = { logs: [], lastError: null, lastState: null, recentNetwork: [], timestamp: 0 };
 let commandsList = [];
 
+const appClients = new Set();
+const pendingRequests = new Map();
+
+function isOpen(client) {
+  return client.readyState === 1;
+}
+
+function sendJson(client, payload) {
+  if (!isOpen(client)) return;
+  client.send(JSON.stringify(payload));
+}
+
 wss.on('connection', (ws) => {
   console.log('[assist] Client connected');
 
   ws.on('message', (data) => {
     try {
       const msg = JSON.parse(data.toString());
-      
+
       if (msg.type === 'context') {
         latestContext = msg.data;
-      } else if (msg.type === 'commands') {
+        appClients.add(ws);
+        return;
+      }
+
+      if (msg.type === 'commands') {
         commandsList = msg.data;
-      } else if (msg.type === 'event') {
-        // Broadcast events to all other clients (for multi-agent scenarios)
+        appClients.add(ws);
+        return;
+      }
+
+      if (msg.type === 'event') {
         wss.clients.forEach((client) => {
-          if (client !== ws && client.readyState === 1) {
-            client.send(JSON.stringify(msg));
-          }
+          if (client !== ws) sendJson(client, msg);
         });
+        return;
+      }
+
+      if (msg.type === 'execute') {
+        pendingRequests.set(msg.requestId, ws);
+
+        let sent = false;
+        wss.clients.forEach((client) => {
+          if (!appClients.has(client)) return;
+          sendJson(client, {
+            type: 'execute',
+            command: msg.command,
+            payload: msg.payload,
+            requestId: msg.requestId,
+          });
+          sent = true;
+        });
+
+        if (!sent) {
+          pendingRequests.delete(msg.requestId);
+          sendJson(ws, {
+            type: 'executeResult',
+            requestId: msg.requestId,
+            result: { ok: false, error: 'No app client connected to execute commands' },
+          });
+        }
+
+        return;
+      }
+
+      if (msg.type === 'executeResult') {
+        const requester = pendingRequests.get(msg.requestId);
+        if (requester) {
+          pendingRequests.delete(msg.requestId);
+          sendJson(requester, msg);
+        }
+        return;
       }
     } catch (e) {
       console.error('[assist] Parse error:', e);
@@ -65,34 +119,14 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     console.log('[assist] Client disconnected');
-  });
+    appClients.delete(ws);
 
-  // Send any pending commands
-  ws.send(JSON.stringify({ type: 'connected', timestamp: Date.now() }));
-});
-
-// RPC endpoint for executing commands
-wss.on('connection', (ws) => {
-  ws.on('message', (data) => {
-    try {
-      const msg = JSON.parse(data.toString());
-      if (msg.type === 'execute') {
-        // Broadcast command execution to the app client
-        wss.clients.forEach((client) => {
-          if (client.readyState === 1) {
-            client.send(JSON.stringify({
-              type: 'execute',
-              command: msg.command,
-              payload: msg.payload,
-              requestId: msg.requestId,
-            }));
-          }
-        });
-      }
-    } catch (e) {
-      // handled above
+    for (const [requestId, requester] of pendingRequests.entries()) {
+      if (requester === ws) pendingRequests.delete(requestId);
     }
   });
+
+  sendJson(ws, { type: 'connected', timestamp: Date.now() });
 });
 
 httpServer.listen(PORT, () => {

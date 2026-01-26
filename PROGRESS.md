@@ -1,1 +1,2 @@
 - 2026-01-26: fix GH Pages base-path (Vite base ./ on build; index.html favicon uses %BASE_URL%). Added pnpm vibe:doctor check. Status: done.
+- 2026-01-26: fix assist-server command loop (route executeResult back to requester; avoid double connection handler). Make assist client origin-aware (wss + hostname + VITE_ASSIST_URL override). Updated vibe:doctor checks. Status: done.

@@ -25,8 +25,9 @@ async function readText(relPath) {
 async function main() {
   const viteConfig = await readText('vite.config.ts')
   const indexHtml = await readText('index.html')
+  const assistServer = await readText('src/devtools/server.js')
 
-  if (!viteConfig || !indexHtml) return
+  if (!viteConfig || !indexHtml || !assistServer) return
 
   const hasBuildRelativeBase = /base\s*:\s*command\s*===\s*['"]build['"]\s*\?\s*['"]\.\/?['"]/m.test(
     viteConfig,
@@ -54,6 +55,32 @@ async function main() {
     fail('index.html should use %BASE_URL%vite.svg for favicon')
   } else {
     pass('index.html favicon uses %BASE_URL%')
+  }
+
+  const handlesExecuteResult = /msg\.type\s*===\s*['"]executeResult['"]/.test(assistServer)
+  if (!handlesExecuteResult) {
+    fail('assist server must handle executeResult (route command results back to requester)')
+  } else {
+    pass('assist server handles executeResult')
+  }
+
+  const assistClient = await readText('src/devtools/client.ts')
+  if (!assistClient) return
+
+  const hasOriginAwareWs = /window\.location\.hostname/.test(assistClient)
+  if (!hasOriginAwareWs) {
+    fail('assist client should default WS host to window.location.hostname (Codespaces/https/LAN safe)')
+  } else {
+    pass('assist client WS host defaults to window.location.hostname')
+  }
+
+  const hasWssSupport = /window\.location\.protocol\s*===\s*['"]https:['"]\s*\?\s*['"]wss['"]\s*:\s*['"]ws['"]/.test(
+    assistClient,
+  )
+  if (!hasWssSupport) {
+    fail('assist client should use wss when window.location.protocol is https:')
+  } else {
+    pass('assist client supports wss on https origins')
   }
 
   if (process.exitCode) {

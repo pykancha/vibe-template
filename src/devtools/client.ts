@@ -5,11 +5,20 @@ import { commands } from './commands';
 let ws: WebSocket | null = null;
 let reconnectTimer: number | null = null;
 
+function getAssistUrl(port: number) {
+  const override = import.meta.env.VITE_ASSIST_URL;
+  if (override && typeof override === 'string') return override;
+
+  const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  const host = window.location.hostname;
+  return `${proto}://${host}:${port}`;
+}
+
 export function connectAssist(port = 3001) {
   if (ws?.readyState === WebSocket.OPEN) return;
 
   try {
-    ws = new WebSocket(`ws://localhost:${port}`);
+    ws = new WebSocket(getAssistUrl(port));
 
     ws.onopen = () => {
       console.log('[assist] Connected to assist server');
@@ -23,13 +32,26 @@ export function connectAssist(port = 3001) {
         const msg = JSON.parse(event.data);
         if (msg.type === 'execute') {
           // Execute command from remote
-          commands.execute(msg.command, msg.payload).then((result) => {
-            ws?.send(JSON.stringify({
-              type: 'executeResult',
-              requestId: msg.requestId,
-              result,
-            }));
-          });
+          commands.execute(msg.command, msg.payload).then(
+            (result) => {
+              ws?.send(
+                JSON.stringify({
+                  type: 'executeResult',
+                  requestId: msg.requestId,
+                  result,
+                }),
+              );
+            },
+            (error) => {
+              ws?.send(
+                JSON.stringify({
+                  type: 'executeResult',
+                  requestId: msg.requestId,
+                  result: { ok: false, error: String(error) },
+                }),
+              );
+            },
+          );
         }
       } catch (e) {
         console.error('[assist] Message parse error:', e);
