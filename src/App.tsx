@@ -1,11 +1,11 @@
-import './index.css';
-import { useEffect } from 'react';
-import { Route, Routes, Link } from 'react-router-dom';
-import { useStore } from '@/store';
-import { DevAssistant, connectAssist } from '@/devtools';
+import './index.css'
+import { useEffect } from 'react'
+import { Route, Routes, Link } from 'react-router-dom'
+import { useStore } from '@/store'
+import { DevAssistant, connectAssist } from '@/devtools'
 
 function Home() {
-  const { theme, setTheme, user, setUser } = useStore();
+  const { theme, setTheme, user, setUser } = useStore()
 
   return (
     <main className="space-y-6">
@@ -67,7 +67,7 @@ function Home() {
         </div>
       </section>
     </main>
-  );
+  )
 }
 
 function About() {
@@ -76,15 +76,15 @@ function About() {
       <h2 className="text-xl font-semibold mb-2">About</h2>
       <p className="text-zinc-300">HashRouter skeleton: basic routes so agent navigation is meaningful.</p>
     </main>
-  );
+  )
 }
 
 function App() {
   useEffect(() => {
     if (import.meta.env.DEV && import.meta.env.VITE_ASSIST === '1') {
-      connectAssist();
+      connectAssist()
     }
-  }, []);
+  }, [])
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 p-8">
@@ -110,7 +110,7 @@ function App() {
 
       {import.meta.env.DEV && import.meta.env.VITE_ASSIST === '1' && <DevAssistant />}
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
