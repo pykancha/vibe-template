@@ -22,14 +22,30 @@ async function readText(relPath) {
   }
 }
 
+async function readTextOptional(relPath) {
+  const absPath = path.join(root, relPath)
+  try {
+    return await fs.readFile(absPath, 'utf8')
+  } catch {
+    return null
+  }
+}
+
 async function main() {
+  const templateInvariants = await readText('TEMPLATE_INVARIANTS.md')
   const packageJsonText = await readText('package.json')
   const viteConfig = await readText('vite.config.ts')
   const indexHtml = await readText('index.html')
   const assistServer = await readText('src/devtools/server.js')
   const store = await readText('src/store/index.ts')
 
-  if (!packageJsonText || !viteConfig || !indexHtml || !assistServer || !store) return
+  if (!templateInvariants || !packageJsonText || !viteConfig || !indexHtml || !assistServer || !store) return
+
+  if (!templateInvariants.trim()) {
+    fail('TEMPLATE_INVARIANTS.md must be non-empty')
+  } else {
+    pass('TEMPLATE_INVARIANTS.md exists')
+  }
 
   try {
     const pkg = JSON.parse(packageJsonText)
@@ -130,6 +146,16 @@ async function main() {
     fail('router must be HashRouter by default (GH Pages friendly)')
   } else {
     pass('router is HashRouter by default')
+  }
+
+  const deployWorkflow = await readTextOptional('.github/workflows/deploy.yml')
+  if (deployWorkflow) {
+    const usesPnpmCheck = /run:\s*pnpm\s+check\b/.test(deployWorkflow)
+    if (!usesPnpmCheck) {
+      fail('deploy workflow should run pnpm check')
+    } else {
+      pass('deploy workflow runs pnpm check')
+    }
   }
 
   if (process.exitCode) {

@@ -1,10 +1,8 @@
 # TODO
 
-## P0
-- Maintain required project control files: TODO.md + SPEC.md (this repo expects them).
+## P0 (highest priority)
+- Keep `TEMPLATE_INVARIANTS.md` present + enforced in `pnpm vibe:doctor`.
 
 ## P1
-- Add an example feature + minimal automated test(s) once test runner is selected.
-
-## P2
-- Polish DevAssistant UX and docs as features expand.
+- Keep `pnpm check` as the single verification loop: doctor + lint + test + build.
+- Keep GitHub Pages deploy workflow running `pnpm check`.
