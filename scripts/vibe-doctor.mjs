@@ -45,6 +45,9 @@ async function main() {
   const faviconRootAbsolute = /<link[^>]+rel=["']icon["'][^>]+href=["']\//i.test(indexHtml)
   if (faviconRootAbsolute) rootAbsolutePublicAssetMatches.push('favicon uses root-absolute href')
 
+  const scriptRootAbsolute = /<script[^>]+type=["']module["'][^>]+src=["']\//i.test(indexHtml)
+  if (scriptRootAbsolute) rootAbsolutePublicAssetMatches.push('entry script uses root-absolute src')
+
   if (rootAbsolutePublicAssetMatches.length > 0) {
     fail(`index.html contains root-absolute public asset reference(s): ${rootAbsolutePublicAssetMatches.join(', ')}`)
   } else {
@@ -89,6 +92,16 @@ async function main() {
     fail('store must apply initial theme on startup (e.g. applyTheme(initialState.theme))')
   } else {
     pass('store applies initial theme on startup')
+  }
+
+  const mainEntry = await readText('src/main.tsx')
+  if (!mainEntry) return
+
+  const hasHashRouter = /HashRouter/.test(mainEntry)
+  if (!hasHashRouter) {
+    fail('router must be HashRouter by default (GH Pages friendly)')
+  } else {
+    pass('router is HashRouter by default')
   }
 
   if (process.exitCode) {

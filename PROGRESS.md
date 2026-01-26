@@ -2,3 +2,4 @@
 - 2026-01-26: fix assist-server command loop (route executeResult back to requester; avoid double connection handler). Make assist client origin-aware (wss + hostname + VITE_ASSIST_URL override). Updated vibe:doctor checks. Status: done.
 - 2026-01-26: make pnpm dev the default full dev experience; add pnpm check (doctor+lint+build). Status: done.
 - 2026-01-26: apply initial theme on startup (store applies initialState.theme immediately). Extended vibe:doctor to verify. Status: done.
+- 2026-01-26: add HashRouter skeleton (react-router-dom actually used; / and /about routes). Extend vibe:doctor (index.html entry script base-aware; HashRouter check). Status: done.
