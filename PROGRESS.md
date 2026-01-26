@@ -8,3 +8,4 @@
 - 2026-01-26: add minimal automated test runner (Vitest + Testing Library) and wire into pnpm check (doctor+lint+test+build). Status: done.
 - 2026-01-26: add example feature: todos in Zustand store + UI + test; registered dev commands (addTodo/toggleTodo/clearTodos). Verified via pnpm check. Status: done.
 - 2026-01-26: CI cleanup: remove redundant Build step from GH Pages deploy workflow (pnpm check already runs build). Verified via pnpm check. Status: done.
+- 2026-01-26: strengthen verification loop: vibe:doctor now asserts package.json scripts (vibe:doctor exists; pnpm check includes doctor+lint+test+build). Ran pnpm check. Status: done.

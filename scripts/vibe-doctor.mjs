@@ -23,12 +23,40 @@ async function readText(relPath) {
 }
 
 async function main() {
+  const packageJsonText = await readText('package.json')
   const viteConfig = await readText('vite.config.ts')
   const indexHtml = await readText('index.html')
   const assistServer = await readText('src/devtools/server.js')
   const store = await readText('src/store/index.ts')
 
-  if (!viteConfig || !indexHtml || !assistServer || !store) return
+  if (!packageJsonText || !viteConfig || !indexHtml || !assistServer || !store) return
+
+  try {
+    const pkg = JSON.parse(packageJsonText)
+    const checkScript = pkg?.scripts?.check
+    const doctorScript = pkg?.scripts?.['vibe:doctor']
+
+    if (!doctorScript) {
+      fail('package.json must define scripts.vibe:doctor')
+    } else {
+      pass('package.json defines scripts.vibe:doctor')
+    }
+
+    if (typeof checkScript !== 'string') {
+      fail('package.json must define scripts.check as a string')
+    } else {
+      const requiredParts = ['pnpm vibe:doctor', 'pnpm lint', 'pnpm test', 'pnpm build']
+      const missing = requiredParts.filter((p) => !checkScript.includes(p))
+
+      if (missing.length > 0) {
+        fail(`pnpm check must include: ${missing.join(', ')}`)
+      } else {
+        pass('pnpm check includes doctor + lint + test + build')
+      }
+    }
+  } catch {
+    fail('package.json must be valid JSON')
+  }
 
   const hasBuildRelativeBase = /base\s*:\s*command\s*===\s*['"]build['"]\s*\?\s*['"]\.\/?['"]/m.test(
     viteConfig,
