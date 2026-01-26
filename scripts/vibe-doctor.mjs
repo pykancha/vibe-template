@@ -41,6 +41,15 @@ async function main() {
 
   if (!templateInvariants || !packageJsonText || !viteConfig || !indexHtml || !assistServer || !store) return
 
+  const agentBrowserSkill = await readText('.agent/skills/agent-browser/SKILL.md')
+  if (!agentBrowserSkill) return
+
+  if (!agentBrowserSkill.trim()) {
+    fail('.agent/skills/agent-browser/SKILL.md must be non-empty')
+  } else {
+    pass('.agent/skills/agent-browser/SKILL.md exists')
+  }
+
   if (!templateInvariants.trim()) {
     fail('TEMPLATE_INVARIANTS.md must be non-empty')
   } else {

@@ -15,3 +15,4 @@
 - 2026-01-26: verification loop health-check: ran pnpm check (doctor+lint+test+build) clean. Status: done.
 - 2026-01-26: extend vibe:doctor to assert GH Pages deploy workflow runs pnpm check; ran pnpm check clean. Status: done.
 - 2026-01-26: add TEMPLATE_INVARIANTS.md and enforce presence/non-empty in vibe:doctor; ran pnpm check clean. Status: done.
+- 2026-01-26: add agent-browser skill doc + enforce via vibe:doctor; ran pnpm check clean; commit. Status: done.
