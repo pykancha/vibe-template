@@ -56,12 +56,13 @@ cd my-app
 # Install
 pnpm install
 
-# Development with observability
-pnpm dev:full   # Runs vite + assist server concurrently
+# Development with observability (Default)
+pnpm dev        # Runs vite + assist server concurrently
 
-# Or separately:
-pnpm dev        # App at http://localhost:5173 (VITE_ASSIST=1)
-pnpm assist     # API at http://localhost:3001
+# Other commands
+pnpm dev:solo   # Start Vite without assist overlay
+pnpm assist     # Start WebSocket server only
+pnpm check      # Run doctor + lint + test + build
 ```
 
 ## Using the Template for a New App
@@ -160,9 +161,9 @@ The devtools are completely tree-shaken in production:
 
 | Command         | Description                       |
 | --------------- | --------------------------------- |
-| `pnpm dev`      | Start Vite with VITE_ASSIST=1     |
+| `pnpm dev`      | Start Vite + Assist Server        |
 | `pnpm dev:solo` | Start Vite without assist overlay |
 | `pnpm assist`   | Start WebSocket server only       |
-| `pnpm dev:full` | Run both concurrently             |
+| `pnpm check`    | Run doctor, lint, test, and build |
 | `pnpm build`    | Production build                  |
 | `pnpm lint`     | ESLint check                      |

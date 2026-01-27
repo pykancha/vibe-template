@@ -153,6 +153,20 @@ async function main() {
     pass('assist client supports wss on https origins')
   }
 
+  const hasTokenAuth = /import\.meta\.env\.VITE_ASSIST_TOKEN/.test(assistClient)
+  if (!hasTokenAuth) {
+    fail('assist client should support VITE_ASSIST_TOKEN for auth')
+  } else {
+    pass('assist client supports token auth')
+  }
+
+  const hasServerTokenAuth = /process\.env\.VIBE_ASSIST_TOKEN/.test(assistServer)
+  if (!hasServerTokenAuth) {
+    fail('assist server should support VIBE_ASSIST_TOKEN for auth')
+  } else {
+    pass('assist server supports token auth')
+  }
+
   const appliesInitialTheme = /applyTheme\(initialState\.theme\)/.test(store)
   if (!appliesInitialTheme) {
     fail('store must apply initial theme on startup (e.g. applyTheme(initialState.theme))')
@@ -183,7 +197,19 @@ async function main() {
   if (process.exitCode) {
     console.error('\nDoctor checks failed.')
   } else {
-    console.log('\nDoctor checks passed.')
+    // Only verify Theme State coherency if passing static checks
+    const themeCommandUpdateStore = /useStore\.getState\(\)\.setTheme/.test(await readText('src/devtools/commands.ts'))
+    if (!themeCommandUpdateStore) {
+        fail('commands.ts: setTheme must update store state (useStore.getState().setTheme), not just DOM')
+    } else {
+        pass('commands.ts: setTheme updates store state')
+    }
+    
+    if (process.exitCode) {
+        console.error('\nDoctor checks failed.')
+    } else {
+        console.log('\nDoctor checks passed.')
+    }
   }
 }
 

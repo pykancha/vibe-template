@@ -117,7 +117,7 @@ function Home() {
             Error
           </button>
           <button
-            onClick={() => fetch('/api/test').catch(() => {})}
+            onClick={() => fetch(`${import.meta.env.BASE_URL}api/test`).catch(() => {})}
             className="px-3 py-1 bg-purple-700 rounded hover:bg-purple-600 transition"
           >
             Fetch

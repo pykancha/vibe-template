@@ -6,25 +6,50 @@ import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
 
 const PORT = process.env.ASSIST_PORT || 3001;
+const HOST = process.env.ASSIST_HOST || '127.0.0.1';
+const TOKEN = process.env.VIBE_ASSIST_TOKEN;
+
+if (HOST !== '127.0.0.1' && HOST !== 'localhost' && !TOKEN) {
+  console.error(`[assist] ERROR: VIBE_ASSIST_TOKEN is required when binding to non-localhost (${HOST})`);
+  process.exit(1);
+}
+
+function checkAuth(req) {
+  if (!TOKEN) return true;
+  // req.url is relative, so we use a dummy base
+  const url = new URL(req.url, 'http://localhost');
+  const queryToken = url.searchParams.get('token');
+  const headerToken = req.headers.authorization?.replace('Bearer ', '');
+  return queryToken === TOKEN || headerToken === TOKEN;
+}
 
 const httpServer = createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Content-Type', 'application/json');
 
-  if (req.url === '/health') {
+  if (!checkAuth(req)) {
+    res.writeHead(401);
+    res.end(JSON.stringify({ error: 'Unauthorized' }));
+    return;
+  }
+
+  const url = new URL(req.url, 'http://localhost');
+  const pathname = url.pathname;
+
+  if (pathname === '/health') {
     res.writeHead(200);
     res.end(JSON.stringify({ status: 'ok', clients: wss.clients.size }));
     return;
   }
 
-  if (req.url === '/context') {
+  if (pathname === '/context') {
     // Return the latest context from connected clients
     res.writeHead(200);
     res.end(JSON.stringify(latestContext));
     return;
   }
 
-  if (req.url === '/commands') {
+  if (pathname === '/commands') {
     res.writeHead(200);
     res.end(JSON.stringify(commandsList));
     return;
@@ -80,7 +105,13 @@ function clearPendingRequest(requestId) {
   pendingRequests.delete(requestId);
 }
 
-wss.on('connection', (ws) => {
+wss.on('connection', (ws, req) => {
+  if (!checkAuth(req)) {
+    console.log('[assist] Connection rejected: Unauthorized');
+    ws.close(1008, 'Unauthorized');
+    return;
+  }
+
   console.log('[assist] Client connected');
 
   ws.on('message', (data) => {
@@ -169,9 +200,9 @@ wss.on('connection', (ws) => {
   sendJson(ws, { type: 'connected', timestamp: Date.now() });
 });
 
-httpServer.listen(PORT, () => {
-  console.log(`[assist] Server running on http://localhost:${PORT}`);
-  console.log(`[assist] WebSocket on ws://localhost:${PORT}`);
+httpServer.listen(PORT, HOST, () => {
+  console.log(`[assist] Server running on http://${HOST}:${PORT}`);
+  console.log(`[assist] WebSocket on ws://${HOST}:${PORT}`);
   console.log(`[assist] Endpoints:`);
   console.log(`  GET /health   - Server health`);
   console.log(`  GET /context  - Latest app context`);

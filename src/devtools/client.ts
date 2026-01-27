@@ -11,7 +11,11 @@ function getAssistUrl(port: number) {
 
   const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
   const host = window.location.hostname;
-  return `${proto}://${host}:${port}`;
+  const url = `${proto}://${host}:${port}`;
+  if (import.meta.env.VITE_ASSIST_TOKEN) {
+    return `${url}?token=${import.meta.env.VITE_ASSIST_TOKEN}`;
+  }
+  return url;
 }
 
 export function connectAssist(port = 3001) {

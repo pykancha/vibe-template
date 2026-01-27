@@ -7,9 +7,18 @@
 
 ## Protocol
 
-1. READ `@TEMPLATE_ARCHITECTURE.md` to understand current architecture; maintain harmony with it
-2. You MAY replace this template with user-requested app; MUST keep stack GitHub Pages compatible
-3. For AI API integrations (text/image/video generation) → `@.agent/skills/template-scripts/`
+1. READ `@README.md` for project overview and quick start.
+2. READ `@TEMPLATE_ARCHITECTURE.md` to understand current architecture; maintain harmony with it.
+3. READ `@TEMPLATE_INVARIANTS.md` to understand hard rules (GH Pages compatibility, etc).
+4. You MAY replace this template with user-requested app; MUST keep stack GitHub Pages compatible.
+5. For AI API integrations (text/image/video generation) → `@.agent/skills/template-scripts/`
+
+## Workflow
+
+- **Development**: `pnpm dev` (starts App + Assist Server).
+- **Verification**: `pnpm check` (runs Doctor + Lint + Test + Build). Always run this before committing.
+- **UI Interaction**: Use **agent-browser** skill to drive the UI.
+- **Introspection**: Use `pnpm assist` (running in background via `dev`) to read state/logs.
 
 ## Skill Routing
 
