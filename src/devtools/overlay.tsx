@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { bus, type BusEvent } from './bus';
 import { commands } from './commands';
+import { onConnectionChange } from './client';
 
 function LogEntry({ event }: { event: BusEvent }) {
   const data = event.data as Record<string, unknown>;
@@ -94,16 +95,22 @@ function CommandsView() {
 export function DevAssistant() {
   const [events, setEvents] = useState<BusEvent[]>(() => bus.getBuffer());
   const [errorCount, setErrorCount] = useState(0);
+  const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const unsub = bus.subscribe((event) => {
+    const unsubBus = bus.subscribe((event) => {
       setEvents((prev) => [...prev.slice(-499), event]);
       if (event.type === 'error') {
         setErrorCount((c) => c + 1);
       }
     });
 
-    return unsub;
+    const unsubConn = onConnectionChange(setConnected);
+
+    return () => {
+      unsubBus();
+      unsubConn();
+    };
   }, []);
 
   const logs = events.filter((e) => e.type === 'log' || e.type === 'error');
@@ -119,6 +126,11 @@ export function DevAssistant() {
           className="fixed bottom-4 right-4 z-50 bg-zinc-900 border-zinc-700 hover:bg-zinc-800"
         >
           Dev
+          {connected ? (
+            <div className="w-2 h-2 ml-2 rounded-full bg-green-500 animate-pulse" />
+          ) : (
+            <div className="w-2 h-2 ml-2 rounded-full bg-red-500" />
+          )}
           {errorCount > 0 && (
             <Badge className="ml-2 bg-red-600">{errorCount}</Badge>
           )}
@@ -126,7 +138,12 @@ export function DevAssistant() {
       </SheetTrigger>
       <SheetContent className="w-[500px] sm:w-[600px] bg-zinc-950 border-zinc-800">
         <SheetHeader>
-          <SheetTitle className="text-zinc-200">Dev Assistant</SheetTitle>
+          <div className="flex items-center justify-between">
+            <SheetTitle className="text-zinc-200">Dev Assistant</SheetTitle>
+            <Badge variant={connected ? "default" : "destructive"}>
+              {connected ? "Connected" : "Disconnected"}
+            </Badge>
+          </div>
         </SheetHeader>
         <Tabs defaultValue="console" className="mt-4">
           <TabsList className="bg-zinc-900">

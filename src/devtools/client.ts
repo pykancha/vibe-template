@@ -18,6 +18,21 @@ function getAssistUrl(port: number) {
   return url;
 }
 
+export let isConnected = false;
+const statusListeners: Set<(connected: boolean) => void> = new Set();
+
+export function onConnectionChange(callback: (connected: boolean) => void) {
+  statusListeners.add(callback);
+  callback(isConnected);
+  return () => statusListeners.delete(callback);
+}
+
+function setConnected(connected: boolean) {
+  if (isConnected === connected) return;
+  isConnected = connected;
+  statusListeners.forEach((cb) => cb(connected));
+}
+
 export function connectAssist(port = 3001) {
   if (ws?.readyState === WebSocket.OPEN) return;
 
@@ -26,6 +41,7 @@ export function connectAssist(port = 3001) {
 
     ws.onopen = () => {
       console.log('[assist] Connected to assist server');
+      setConnected(true);
       // Send initial context
       syncContext();
       syncCommands();
@@ -64,6 +80,7 @@ export function connectAssist(port = 3001) {
 
     ws.onclose = () => {
       console.log('[assist] Disconnected, reconnecting in 5s...');
+      setConnected(false);
       ws = null;
       if (reconnectTimer) clearTimeout(reconnectTimer);
       reconnectTimer = window.setTimeout(() => connectAssist(port), 5000);
@@ -71,6 +88,7 @@ export function connectAssist(port = 3001) {
 
     ws.onerror = () => {
       ws?.close();
+      setConnected(false);
     };
   } catch {
     console.log('[assist] Could not connect to assist server');

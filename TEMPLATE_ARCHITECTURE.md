@@ -71,30 +71,23 @@ pnpm check      # Run doctor + lint + test + build
 
 ```typescript
 // src/features/my-feature/store.ts
-import { create } from "zustand";
-import { bus } from "@/devtools/bus";
-import { commands } from "@/devtools/commands";
+import { createVibeStore } from "@/devtools/store-wrapper";
 
 interface MyState {
   items: Item[];
   addItem: (item: Item) => void;
 }
 
-export const useMyStore = create<MyState>((set) => ({
-  items: [],
-  addItem: (item) => set((s) => ({ items: [...s.items, item] })),
-}));
-
-// Dev mode: emit state + register commands
-if (import.meta.env.DEV) {
-  useMyStore.subscribe((state) => {
-    bus.emit("state", { module: "myFeature", ...state });
-  });
-
-  commands.register("addTestItem", "Add a test item", () => {
-    useMyStore.getState().addItem({ id: "1", name: "Test" });
-  });
-}
+export const useMyStore = createVibeStore<MyState>(
+  (set) => ({
+    items: [],
+    addItem: (item) => set((s) => ({ items: [...s.items, item] })),
+  }),
+  {
+    name: "myFeature", // namespace for commands/state
+  }
+);
+// That's it! State and commands are auto-registered in dev.
 ```
 
 ### 2. Build UI Components

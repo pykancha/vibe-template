@@ -1,7 +1,7 @@
 // Safe command registry for AI agents to control the app
 import { bus } from './bus';
 
-type CommandHandler = (payload?: unknown) => void | Promise<void>;
+type CommandHandler = (payload?: unknown) => unknown | Promise<unknown>;
 
 interface CommandDef {
   name: string;
@@ -16,16 +16,16 @@ class CommandRegistry {
     this.commands.set(name, { name, description, handler });
   }
 
-  async execute(name: string, payload?: unknown): Promise<{ success: boolean; error?: string }> {
+  async execute(name: string, payload?: unknown): Promise<{ success: boolean; error?: string; result?: unknown }> {
     const cmd = this.commands.get(name);
     if (!cmd) {
       return { success: false, error: `Unknown command: ${name}` };
     }
 
     try {
-      await cmd.handler(payload);
+      const result = await cmd.handler(payload);
       bus.emit('command', { name, payload, success: true });
-      return { success: true };
+      return { success: true, result };
     } catch (e) {
       const error = String(e);
       bus.emit('command', { name, payload, success: false, error });
@@ -49,16 +49,22 @@ commands.register('navigate', 'Navigate to a route', (payload) => {
   window.location.hash = path.startsWith('#') ? path : `#${path}`;
 });
 
-commands.register('reload', 'Reload the page', () => {
-  window.location.reload();
+commands.register('nav.current', 'Get current hash route', () => {
+  // Return format: "/about" (without hash) or "/"
+  const hash = window.location.hash;
+  return hash.length > 1 ? hash.slice(1) : '/';
 });
 
-commands.register('setTheme', 'Set theme to light/dark', async (payload) => {
-  const theme = payload === 'light' || payload === 'dark' ? payload : null;
-  if (!theme) throw new Error('setTheme payload must be "light" or "dark"');
+commands.register('nav.back', 'Go back in history', () => {
+  window.history.back();
+});
 
-  const { useStore } = await import('@/store');
-  useStore.getState().setTheme(theme);
+commands.register('nav.forward', 'Go forward in history', () => {
+  window.history.forward();
+});
+
+commands.register('reload', 'Reload the page', () => {
+  window.location.reload();
 });
 
 commands.register('clearLogs', 'Clear the debug bus buffer', () => {

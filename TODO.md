@@ -8,11 +8,11 @@
 
 ## Medium Priority (P2) - Long-term Coherence
 
-- [ ] **Store Wrapper**: Add `createVibeStore()` for implicit instrumentation (auto-emit state, auto-register commands).
-- [ ] **Navigation Commands**: Add `nav.current`, `nav.back`, `nav.forward` to registry.
-- [ ] **Overlay UX**: Add connection status indicator (Connected/Disconnected badge) to the devtools overlay.
-- [ ] **Doctor Checks**: Add checks for:
-    - [ ] `cross-env` usage in scripts
+- [x] **Store Wrapper**: Add `createVibeStore()` for implicit instrumentation (auto-emit state, auto-register commands).
+- [x] **Navigation Commands**: Add `nav.current`, `nav.back`, `nav.forward` to registry.
+- [x] **Overlay UX**: Add connection status indicator (Connected/Disconnected badge) to the devtools overlay.
+- [x] **Doctor Checks**: Add checks for:
+    - [x] `cross-env` usage in scripts
 
 ## Documentation
 

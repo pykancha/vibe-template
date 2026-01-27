@@ -1,7 +1,5 @@
 // Zustand store with dev bus integration
-import { create } from 'zustand';
-import { bus } from '@/devtools/bus';
-import { commands } from '@/devtools/commands';
+import { createVibeStore } from '@/devtools/store-wrapper';
 
 // Generic app state - extend this for your app
 export interface Todo {
@@ -40,7 +38,7 @@ function applyTheme(theme: AppState['theme']) {
 
 applyTheme(initialState.theme);
 
-export const useStore = create<AppState>((set) => ({
+export const useStore = createVibeStore<AppState>((set) => ({
   ...initialState,
 
   setUser: (user) => set({ user }),
@@ -67,51 +65,31 @@ export const useStore = create<AppState>((set) => ({
   clearTodos: () => set({ todos: [] }),
 
   reset: () => set(initialState),
-}));
+}), {
+  name: 'app',
+});
 
-// Subscribe to state changes and emit to bus (dev only)
+// Register extra commands (dev only)
 if (import.meta.env.DEV) {
-  let lastEmit = 0;
-  const throttleMs = 100;
+  import('@/devtools/commands').then(({ commands }) => {
+    // Legacy support
+    commands.register('setTheme', 'Set theme (legacy)', (payload) => {
+      const theme = payload === 'light' || payload === 'dark' ? payload : null;
+      if (!theme) throw new Error('setTheme payload must be "light" or "dark"');
+      useStore.getState().setTheme(theme);
+    });
 
-  useStore.subscribe((state) => {
-    const now = Date.now();
-    if (now - lastEmit > throttleMs) {
-      lastEmit = now;
-      // Strip functions from state for serialization
-      const serializable = Object.fromEntries(
-        Object.entries(state).filter(([, v]) => typeof v !== 'function')
-      );
-      bus.emit('state', serializable);
-    }
-  });
+    commands.register('addTodo', 'Add a todo (payload: string)', (payload) => {
+      useStore.getState().addTodo(String(payload ?? ''));
+    });
 
-  // Register store commands
-  commands.register('resetState', 'Reset app state to initial values', () => {
-    useStore.getState().reset();
-  });
+    commands.register('toggleTodo', 'Toggle todo done state (payload: id)', (payload) => {
+      useStore.getState().toggleTodo(String(payload ?? ''));
+    });
 
-  commands.register('setState', 'Set partial state', (payload) => {
-    useStore.setState(payload as Partial<AppState>);
-  });
-
-  commands.register('getState', 'Get current state snapshot', () => {
-    const state = useStore.getState();
-    const serializable = Object.fromEntries(
-      Object.entries(state).filter(([, v]) => typeof v !== 'function')
-    );
-    console.log('[State Snapshot]', serializable);
-  });
-
-  commands.register('addTodo', 'Add a todo (payload: string)', (payload) => {
-    useStore.getState().addTodo(String(payload ?? ''));
-  });
-
-  commands.register('toggleTodo', 'Toggle todo done state (payload: id)', (payload) => {
-    useStore.getState().toggleTodo(String(payload ?? ''));
-  });
-
-  commands.register('clearTodos', 'Clear all todos', () => {
-    useStore.getState().clearTodos();
+    commands.register('clearTodos', 'Clear all todos', () => {
+      useStore.getState().clearTodos();
+    });
   });
 }
+

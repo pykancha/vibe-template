@@ -63,6 +63,17 @@ async function main() {
     pass('agent-browser skill includes install steps')
   }
 
+  // Cross-env check
+  const usesCrossEnv = /cross-env/.test(packageJsonText)
+  if (usesCrossEnv) {
+    pass('package.json uses cross-env for platform compatibility')
+  } else {
+    // If we use env vars in scripts, we should use cross-env
+    if (/VITE_ASSIST=/.test(packageJsonText)) {
+       fail('package.json scripts use env vars but missing cross-env (Windows compatibility)')
+    }
+  }
+
   if (!templateInvariants.trim()) {
     fail('TEMPLATE_INVARIANTS.md must be non-empty')
   } else {
@@ -197,12 +208,20 @@ async function main() {
   if (process.exitCode) {
     console.error('\nDoctor checks failed.')
   } else {
-    // Only verify Theme State coherency if passing static checks
-    const themeCommandUpdateStore = /useStore\.getState\(\)\.setTheme/.test(await readText('src/devtools/commands.ts'))
-    if (!themeCommandUpdateStore) {
-        fail('commands.ts: setTheme must update store state (useStore.getState().setTheme), not just DOM')
+    // Check if store commands are being registered (in store/index.ts now, not commands.ts)
+    const storeRegistersCommands = /commands\.register/.test(store)
+    if (!storeRegistersCommands) {
+        fail('store/index.ts: must register commands for state manipulation')
     } else {
-        pass('commands.ts: setTheme updates store state')
+        pass('store/index.ts: registers state commands')
+    }
+
+    // Check if setTheme command exists in store (legacy support)
+    const hasSetTheme = /commands\.register\(\s*['"]setTheme['"]/.test(store)
+    if (!hasSetTheme) {
+        fail('store/index.ts: must register legacy setTheme command')
+    } else {
+        pass('store/index.ts: registers legacy setTheme command')
     }
     
     if (process.exitCode) {
