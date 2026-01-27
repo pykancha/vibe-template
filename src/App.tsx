@@ -20,6 +20,7 @@ function Home() {
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="px-3 py-1 bg-zinc-800 rounded hover:bg-zinc-700 transition"
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >
               {theme}
             </button>
@@ -59,6 +60,7 @@ function Home() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Add a todo"
+            aria-label="New todo text"
           />
           <button
             type="submit"
@@ -81,12 +83,15 @@ function Home() {
               <button
                 className="flex-1 text-left px-3 py-2 rounded bg-zinc-950 border border-zinc-800 hover:border-zinc-700"
                 onClick={() => toggleTodo(t.id)}
+                aria-checked={t.done}
+                role="checkbox"
               >
                 <span className={t.done ? 'line-through text-zinc-500' : ''}>{t.text}</span>
               </button>
               <button
                 className="px-3 py-2 bg-zinc-800 rounded hover:bg-zinc-700 transition"
                 onClick={() => removeTodo(t.id)}
+                aria-label={`Remove ${t.text}`}
               >
                 Remove
               </button>

@@ -146,7 +146,7 @@ wss.on('connection', (ws, req) => {
           sendJson(requester, {
             type: 'executeResult',
             requestId,
-            result: { ok: false, error: 'No app client connected to execute commands' },
+            result: { success: false, error: 'No app client connected to execute commands' },
           });
           return;
         }
@@ -156,7 +156,7 @@ wss.on('connection', (ws, req) => {
           sendJson(requester, {
             type: 'executeResult',
             requestId,
-            result: { ok: false, error: 'Command timed out waiting for executeResult' },
+            result: { success: false, error: 'Command timed out waiting for executeResult' },
           });
         }, 15_000);
 

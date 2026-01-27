@@ -25,9 +25,11 @@ test('can add and toggle a todo', async () => {
   await user.type(screen.getByPlaceholderText('Add a todo'), 'Buy milk')
   await user.click(screen.getByRole('button', { name: 'Add' }))
 
-  const todo = screen.getByRole('button', { name: 'Buy milk' })
+  const todo = screen.getByRole('checkbox', { name: 'Buy milk' })
   expect(todo).toBeInTheDocument()
+  expect(todo).not.toBeChecked()
 
   await user.click(todo)
+  expect(todo).toBeChecked()
   expect(screen.getByText('Buy milk')).toHaveClass('line-through')
 })
