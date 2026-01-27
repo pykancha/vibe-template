@@ -50,6 +50,19 @@ async function main() {
     pass('.agent/skills/agent-browser/SKILL.md exists')
   }
 
+  if (/\.\/browser-start\.js/.test(agentBrowserSkill)) {
+    fail('.agent/skills/agent-browser/SKILL.md must not reference ./browser-start.js (file is not part of this template)')
+  } else {
+    pass('agent-browser skill does not reference missing browser-start.js')
+  }
+
+  const hasInstallSteps = /npm\s+install\s+-g\s+agent-browser/.test(agentBrowserSkill) && /agent-browser\s+install/.test(agentBrowserSkill)
+  if (!hasInstallSteps) {
+    fail('agent-browser skill must include install steps (npm install -g agent-browser; agent-browser install)')
+  } else {
+    pass('agent-browser skill includes install steps')
+  }
+
   if (!templateInvariants.trim()) {
     fail('TEMPLATE_INVARIANTS.md must be non-empty')
   } else {

@@ -1,58 +1,66 @@
 ---
 name: agent-browser
-description: Attach to Chrome and drive the UI deterministically (recommended path for UI automation).
+description: Drive the real UI (click/type/scroll) deterministically via snapshots.
 allowed-tools:
   - bash
 metadata:
-  version: "1.0"
+  version: "1.1"
 ---
 
-# Agent Browser (UI driving)
+# agent-browser (UI driving)
 
-Use this when you want the agent to click/type/scroll in the real UI, not just inspect app state.
+Use this when you want the agent to interact with the real UI, not just inspect app state.
 
-## Recommended flow (attach to existing Chrome)
-
-1) Start Chrome with remote debugging:
+## Install (one-time)
 
 ```bash
-./browser-start.js
+npm install -g agent-browser
+agent-browser install
 ```
 
-2) Connect agent-browser to the same Chrome instance:
+## Dev setup (recommended)
+
+Start the app + assist server:
 
 ```bash
-agent-browser connect 9222
+pnpm dev
 ```
 
-3) Navigate and interact via snapshot loop:
+## Recommended flow (lowest friction)
+
+Let agent-browser open its own controlled browser:
+
+```bash
+agent-browser open http://localhost:5173/#/
+```
+
+Then iterate in a snapshot loop:
 
 - take snapshot
 - find target element by label/text/role
 - click/type
 - re-snapshot and verify
 
-## Dev setup (recommended)
+## Advanced: attach to an existing Chrome (CDP)
 
-Run the app + assist server:
+If you already started Chrome with `--remote-debugging-port=9222`:
 
 ```bash
-pnpm dev:full
+agent-browser connect 9222
 ```
-
-This gives you:
-- UI automation via agent-browser
-- introspection via the in-app dev overlay + assist server
 
 ## Common failures
 
+- "Command not found: agent-browser"
+  - Re-run the install steps above
+
 - "Cannot connect" to `:9222`
-  - Re-run `./browser-start.js` (it enables remote debugging)
+  - Ensure Chrome was started with `--remote-debugging-port=9222`
   - Check the port is not already in use
 
-- Page looks right but actions are flaky
+- Actions are flaky
   - Prefer stable targets: real `<button>`, `<input>`, `<label>`
   - Avoid relying on layout-only selectors
 
 - Multiple Chrome instances
-  - Close other Chrome windows and start again via `./browser-start.js`
+  - Close other Chrome windows and retry
