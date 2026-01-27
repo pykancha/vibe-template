@@ -53,10 +53,12 @@ commands.register('reload', 'Reload the page', () => {
   window.location.reload();
 });
 
-commands.register('setTheme', 'Set theme to light/dark', (payload) => {
-  const theme = payload as 'light' | 'dark';
-  document.documentElement.classList.remove('light', 'dark');
-  document.documentElement.classList.add(theme);
+commands.register('setTheme', 'Set theme to light/dark', async (payload) => {
+  const theme = payload === 'light' || payload === 'dark' ? payload : null;
+  if (!theme) throw new Error('setTheme payload must be "light" or "dark"');
+
+  const { useStore } = await import('@/store');
+  useStore.getState().setTheme(theme);
 });
 
 commands.register('clearLogs', 'Clear the debug bus buffer', () => {

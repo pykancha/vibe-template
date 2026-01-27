@@ -47,7 +47,7 @@ export function connectAssist(port = 3001) {
                 JSON.stringify({
                   type: 'executeResult',
                   requestId: msg.requestId,
-                  result: { ok: false, error: String(error) },
+                  result: { success: false, error: String(error) },
                 }),
               );
             },

@@ -40,6 +40,7 @@ let latestContext = { logs: [], lastError: null, lastState: null, recentNetwork:
 let commandsList = [];
 
 const appClients = new Set();
+const appClientLastSeen = new Map();
 const pendingRequests = new Map();
 
 function isOpen(client) {
@@ -51,6 +52,34 @@ function sendJson(client, payload) {
   client.send(JSON.stringify(payload));
 }
 
+function markAppClientActive(ws) {
+  appClients.add(ws);
+  appClientLastSeen.set(ws, Date.now());
+}
+
+function getActiveAppClient() {
+  let bestClient = null;
+  let bestSeen = -1;
+
+  for (const client of appClients) {
+    if (!isOpen(client)) continue;
+    const seen = appClientLastSeen.get(client) ?? 0;
+    if (seen > bestSeen) {
+      bestSeen = seen;
+      bestClient = client;
+    }
+  }
+
+  return bestClient;
+}
+
+function clearPendingRequest(requestId) {
+  const entry = pendingRequests.get(requestId);
+  if (!entry) return;
+  if (entry.timeoutId) clearTimeout(entry.timeoutId);
+  pendingRequests.delete(requestId);
+}
+
 wss.on('connection', (ws) => {
   console.log('[assist] Client connected');
 
@@ -60,13 +89,13 @@ wss.on('connection', (ws) => {
 
       if (msg.type === 'context') {
         latestContext = msg.data;
-        appClients.add(ws);
+        markAppClientActive(ws);
         return;
       }
 
       if (msg.type === 'commands') {
         commandsList = msg.data;
-        appClients.add(ws);
+        markAppClientActive(ws);
         return;
       }
 
@@ -78,37 +107,45 @@ wss.on('connection', (ws) => {
       }
 
       if (msg.type === 'execute') {
-        pendingRequests.set(msg.requestId, ws);
+        const requestId = msg.requestId;
+        const requester = ws;
 
-        let sent = false;
-        wss.clients.forEach((client) => {
-          if (!appClients.has(client)) return;
-          sendJson(client, {
-            type: 'execute',
-            command: msg.command,
-            payload: msg.payload,
-            requestId: msg.requestId,
-          });
-          sent = true;
-        });
-
-        if (!sent) {
-          pendingRequests.delete(msg.requestId);
-          sendJson(ws, {
+        const activeClient = getActiveAppClient();
+        if (!activeClient) {
+          sendJson(requester, {
             type: 'executeResult',
-            requestId: msg.requestId,
+            requestId,
             result: { ok: false, error: 'No app client connected to execute commands' },
           });
+          return;
         }
+
+        const timeoutId = setTimeout(() => {
+          clearPendingRequest(requestId);
+          sendJson(requester, {
+            type: 'executeResult',
+            requestId,
+            result: { ok: false, error: 'Command timed out waiting for executeResult' },
+          });
+        }, 15_000);
+
+        pendingRequests.set(requestId, { requester, timeoutId });
+
+        sendJson(activeClient, {
+          type: 'execute',
+          command: msg.command,
+          payload: msg.payload,
+          requestId,
+        });
 
         return;
       }
 
       if (msg.type === 'executeResult') {
-        const requester = pendingRequests.get(msg.requestId);
-        if (requester) {
-          pendingRequests.delete(msg.requestId);
-          sendJson(requester, msg);
+        const entry = pendingRequests.get(msg.requestId);
+        if (entry?.requester) {
+          clearPendingRequest(msg.requestId);
+          sendJson(entry.requester, msg);
         }
         return;
       }
@@ -120,9 +157,12 @@ wss.on('connection', (ws) => {
   ws.on('close', () => {
     console.log('[assist] Client disconnected');
     appClients.delete(ws);
+    appClientLastSeen.delete(ws);
 
-    for (const [requestId, requester] of pendingRequests.entries()) {
-      if (requester === ws) pendingRequests.delete(requestId);
+    for (const [requestId, entry] of pendingRequests.entries()) {
+      if (entry?.requester === ws) {
+        clearPendingRequest(requestId);
+      }
     }
   });
 
