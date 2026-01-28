@@ -49,6 +49,11 @@ commands.register('navigate', 'Navigate to a route', (payload) => {
   window.location.hash = path.startsWith('#') ? path : `#${path}`;
 });
 
+commands.register('nav.go', 'Navigate to a route (alias for navigate)', (payload) => {
+  const path = payload as string;
+  window.location.hash = path.startsWith('#') ? path : `#${path}`;
+});
+
 commands.register('nav.current', 'Get current hash route', () => {
   // Return format: "/about" (without hash) or "/"
   const hash = window.location.hash;

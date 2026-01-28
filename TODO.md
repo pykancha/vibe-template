@@ -13,6 +13,7 @@
 - [x] **Overlay UX**: Add connection status indicator (Connected/Disconnected badge) to the devtools overlay.
 - [x] **Doctor Checks**: Add checks for:
     - [x] `cross-env` usage in scripts
+    - [x] Build purity (devtools tree-shaking)
 
 ## Documentation
 

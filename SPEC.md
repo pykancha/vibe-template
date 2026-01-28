@@ -428,15 +428,16 @@ Commands must work even if app adds nested routes.
 - includes quickstart commands
 - lists common failure modes and fixes
 
-### 12.2 Attach to existing Chrome (CDP bridge)
+### 12.2 agent-browser workflow (Zero Config)
 
-**Requirement:** Your existing browser-tools launch step remains valid and becomes the preferred starting point for UI driving.
+**Requirement:** The template prefers the "zero-config" agent-browser flow (`agent-browser open`) for lowest friction.
 
-Canonical flow:
+Canonical flow (default):
 
-1. start chrome with remote debugging (existing browser-tools)
-2. run `agent-browser connect 9222`
-3. use snapshot ref loop for deterministic interaction
+1. `pnpm dev`
+2. `agent-browser open http://localhost:5173`
+
+**Advanced/Optional:** Attaching to an existing Chrome instance (`agent-browser connect 9222`) is supported but not required for the default experience.
 
 ### 12.3 Accessibility conventions
 
@@ -601,7 +602,7 @@ Add `pnpm vibe:doctor`
   - graceful reconnect / disconnected UX
 
 - `.agent/skills/agent-browser/SKILL.md`
-- Updated `.agent/skills/browser-tools/SKILL.md`
+- (Optional) `.agent/skills/browser-tools/SKILL.md`
 - Updated `.agent/skills/github/SKILL.md` with full GH Pages workflow
 - Updated `AGENTS.md` to explain the “agent-browser + devtools” workflow
 

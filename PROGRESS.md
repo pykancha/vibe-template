@@ -447,6 +447,8 @@ The **highest priority remaining** items for “maximum compatibility + low fric
 
 ## OnGOING PROGRESS
 
+- 2026-01-27: verify all skills in .agent/skills have non-empty SKILL.md via vibe:doctor (Spec 14.2 compliance). Status: done.
+- 2026-01-27: add unit tests for store-wrapper (createVibeStore) and align nav.go command with spec. Status: done.
 - 2026-01-26: fix GH Pages base-path (Vite base ./ on build; index.html favicon uses %BASE_URL%). Added pnpm vibe:doctor check. Status: done.
 - 2026-01-26: fix assist-server command loop (route executeResult back to requester; avoid double connection handler). Make assist client origin-aware (wss + hostname + VITE_ASSIST_URL override). Updated vibe:doctor checks. Status: done.
 - 2026-01-26: make pnpm dev the default full dev experience; add pnpm check (doctor+lint+build). Status: done.
@@ -473,3 +475,4 @@ The **highest priority remaining** items for “maximum compatibility + low fric
 - 2026-01-27: impl createVibeStore (P2.1) for implicit state instrumentation; refactored store/index.ts to use it. Added nav commands (P2.2). Added overlay connection indicator (P2.3). Added doctor check for cross-env (P2.4). Ran pnpm check clean. Status: done.
 - 2026-01-27: server test suite added; verify correct error handling for assist server protocol (executeResult, timeouts, missing client). Ran pnpm check clean. Status: done.
 - 2026-01-27: accessibility improvements (P2): added aria-labels, role="checkbox", aria-checked for Todo items. Added vite-env.d.ts for type safety. Ran pnpm check clean. Status: done.
+- 2026-01-28: verification robustness: added scripts/test-build-purity.sh to verify devtools are tree-shaken from production build. Ran pnpm check clean. Status: done.

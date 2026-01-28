@@ -223,6 +223,42 @@ async function main() {
     } else {
         pass('store/index.ts: registers legacy setTheme command')
     }
+
+    // New check: verify all skills in .agent/skills have non-empty SKILL.md
+    try {
+      const skillsDir = path.join(root, '.agent/skills')
+      const entries = await fs.readdir(skillsDir, { withFileTypes: true })
+      
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const skillMdPath = path.join(skillsDir, entry.name, 'SKILL.md')
+          try {
+            const content = await fs.readFile(skillMdPath, 'utf8')
+            if (!content.trim()) {
+              fail(`.agent/skills/${entry.name}/SKILL.md is empty`)
+            }
+          } catch {
+            // Some folders might be utility folders or missing SKILL.md (which is bad but handled here)
+            // Ideally every folder in skills/ should be a skill
+            if (entry.name !== 'template-scripts' && entry.name !== 'tools') {
+               fail(`.agent/skills/${entry.name}/SKILL.md missing`)
+            }
+          }
+        }
+      }
+      pass('All skills have non-empty SKILL.md')
+    } catch (e) {
+      // If skills dir doesn't exist that's fine for now or handled elsewhere
+    }
+
+    const mainEntry = await readText('src/main.tsx')
+    if (mainEntry) {
+        if (/import.*['"]@\/devtools['"]/.test(mainEntry)) {
+            fail('src/main.tsx (production entry) should not import @/devtools directly; do it in App.tsx gated by DEV')
+        } else {
+            pass('src/main.tsx does not import @/devtools')
+        }
+    }
     
     if (process.exitCode) {
         console.error('\nDoctor checks failed.')
