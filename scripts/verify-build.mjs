@@ -55,6 +55,36 @@ async function main() {
   } else {
     console.log('PASS: Build verification passed (no devtools artifacts found).');
   }
+
+  // Check for root-absolute paths in index.html
+  // (Static First invariant: must work on subpaths)
+  const indexHtmlPath = path.join(root, 'dist', 'index.html');
+  try {
+    const indexHtml = await fs.readFile(indexHtmlPath, 'utf8');
+    
+    // We want to avoid href="/..." or src="/..." 
+    // BUT we must allow href="//..." (protocol relative) which is fine.
+    // Regex: look for href= or src= followed by quote, then /, then NOT /
+    const rootAbsRegex = /(?:href|src)=["']\/[^/]/;
+    
+    if (rootAbsRegex.test(indexHtml)) {
+      console.error('FAIL: dist/index.html contains root-absolute paths (e.g. href="/foo").');
+      console.error('      This breaks GitHub Pages subpath deployment.');
+      console.error('      Ensure vite.config.ts sets base: "./" for build.');
+      
+      // Print the match for debugging
+      const match = indexHtml.match(rootAbsRegex);
+      console.error(`      Match: ${match[0]}`);
+      
+      process.exit(1);
+    } else {
+      console.log('PASS: dist/index.html uses relative paths (Static First compliant).');
+    }
+
+  } catch (e) {
+    console.error('FAIL: Could not read dist/index.html');
+    process.exit(1);
+  }
 }
 
 main();

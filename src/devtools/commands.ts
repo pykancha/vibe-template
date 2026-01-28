@@ -14,6 +14,7 @@ class CommandRegistry {
 
   register(name: string, description: string, handler: CommandHandler) {
     this.commands.set(name, { name, description, handler });
+    bus.emit('registry', { commands: this.list() });
   }
 
   async execute(name: string, payload?: unknown): Promise<{ success: boolean; error?: string; result?: unknown }> {

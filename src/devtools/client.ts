@@ -56,6 +56,7 @@ export function connectAssist(port = 3001) {
             (result) => {
               ws?.send(
                 JSON.stringify({
+                  v: 1,
                   type: 'executeResult',
                   requestId: msg.requestId,
                   result,
@@ -65,6 +66,7 @@ export function connectAssist(port = 3001) {
             (error) => {
               ws?.send(
                 JSON.stringify({
+                  v: 1,
                   type: 'executeResult',
                   requestId: msg.requestId,
                   result: { success: false, error: String(error) },
@@ -98,6 +100,7 @@ export function connectAssist(port = 3001) {
 function syncContext() {
   if (ws?.readyState !== WebSocket.OPEN) return;
   ws.send(JSON.stringify({
+    v: 1,
     type: 'context',
     data: bus.getContext(),
   }));
@@ -106,6 +109,7 @@ function syncContext() {
 function syncCommands() {
   if (ws?.readyState !== WebSocket.OPEN) return;
   ws.send(JSON.stringify({
+    v: 1,
     type: 'commands',
     data: commands.list(),
   }));
@@ -124,6 +128,11 @@ bus.subscribe(() => {
 // Also stream individual events
 bus.subscribe((event) => {
   if (ws?.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: 'event', data: event }));
+    // If registry changes, sync full commands list
+    if (event.type === 'registry') {
+      syncCommands();
+    }
+    // Stream event (including registry event if desired, though syncCommands handles payload)
+    ws.send(JSON.stringify({ v: 1, type: 'event', data: event }));
   }
 });

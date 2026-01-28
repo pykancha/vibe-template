@@ -1,5 +1,5 @@
 // Debug event bus - captures logs, errors, network, state changes
-export type EventType = 'log' | 'error' | 'network' | 'state' | 'navigation' | 'command';
+export type EventType = 'log' | 'error' | 'network' | 'state' | 'navigation' | 'command' | 'registry';
 
 export interface BusEvent {
   id: string;

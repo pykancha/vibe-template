@@ -173,9 +173,16 @@ async function main() {
 
   const hasServerTokenAuth = /process\.env\.VIBE_ASSIST_TOKEN/.test(assistServer)
   if (!hasServerTokenAuth) {
-    fail('assist server should support VIBE_ASSIST_TOKEN for auth')
+  fail('assist server should support VIBE_ASSIST_TOKEN for auth')
   } else {
-    pass('assist server supports token auth')
+  pass('assist server supports token auth')
+  }
+
+  const hasClientProtocolVersion = /v:\s*1/.test(assistClient)
+  if (!hasClientProtocolVersion) {
+  fail('assist client must include protocol version (v: 1) in messages')
+  } else {
+  pass('assist client includes protocol version (v: 1)')
   }
 
   const appliesInitialTheme = /applyTheme\(initialState\.theme\)/.test(store)
