@@ -482,3 +482,6 @@ The **highest priority remaining** items for “maximum compatibility + low fric
 - 2026-01-28: documentation completion (Spec 13.1): added Troubleshooting section to README.md covering common issues (agent-browser, 404s, connection, windows). Verified via pnpm check. Status: done.
 - 2026-01-28: final spec alignment (Spec 13.2): updated AGENTS.md to include explicit Invariants Summary and Preferred Skill Stack. Ran pnpm check clean. Status: done.
 
+## Current Task
+- Everything looks green.
+
