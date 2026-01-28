@@ -9,9 +9,20 @@
 
 1. READ `@README.md` for project overview and quick start.
 2. READ `@TEMPLATE_ARCHITECTURE.md` to understand current architecture; maintain harmony with it.
-3. READ `@TEMPLATE_INVARIANTS.md` to understand hard rules (GH Pages compatibility, etc).
-4. You MAY replace this template with user-requested app; MUST keep stack GitHub Pages compatible.
-5. For AI API integrations (text/image/video generation) → `@.agent/skills/template-scripts/`
+3. READ `@TEMPLATE_INVARIANTS.md` to understand hard rules.
+
+## Template Invariants (Summary)
+
+- **Static First**: Build output must be relative (`base: "./"`) and work on GitHub Pages (subpaths).
+- **Routing**: Must use `HashRouter` by default to avoid 404s on refresh without server config.
+- **Devtools**: `.agent/`, `src/devtools/`, and `src/test/` must be tree-shaken from production.
+- **Verification**: `pnpm check` (Doctor + Lint + Test + Build) is the single source of truth.
+
+## Preferred Skill Stack
+
+- **UI Driving**: Use `agent-browser` (see `.agent/skills/agent-browser/SKILL.md`).
+- **Introspection**: Use built-in Vibe devtools (websocket bus) for state/logs.
+- **Deployment**: Use `github` skill for Pages deployment (`.agent/skills/github/SKILL.md`).
 
 ## Workflow
 
