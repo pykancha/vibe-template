@@ -8,6 +8,7 @@ import { createServer } from 'http';
 const PORT = process.env.ASSIST_PORT || 3001;
 const HOST = process.env.ASSIST_HOST || '127.0.0.1';
 const TOKEN = process.env.VIBE_ASSIST_TOKEN;
+const EXECUTION_TIMEOUT = parseInt(process.env.ASSIST_EXECUTION_TIMEOUT || '15000', 10);
 
 if (HOST !== '127.0.0.1' && HOST !== 'localhost' && !TOKEN) {
   console.error(`[assist] ERROR: VIBE_ASSIST_TOKEN is required when binding to non-localhost (${HOST})`);
@@ -158,7 +159,7 @@ wss.on('connection', (ws, req) => {
             requestId,
             result: { success: false, error: 'Command timed out waiting for executeResult' },
           });
-        }, 15_000);
+        }, EXECUTION_TIMEOUT);
 
         pendingRequests.set(requestId, { requester, timeoutId });
 

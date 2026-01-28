@@ -477,3 +477,4 @@ The **highest priority remaining** items for “maximum compatibility + low fric
 - 2026-01-27: accessibility improvements (P2): added aria-labels, role="checkbox", aria-checked for Todo items. Added vite-env.d.ts for type safety. Ran pnpm check clean. Status: done.
 - 2026-01-28: verification robustness: added scripts/test-build-purity.sh to verify devtools are tree-shaken from production build. Ran pnpm check clean. Status: done.
 - 2026-01-28: verification robustness: added scripts/verify-build.mjs to verify devtools are tree-shaken from production build. Added verify:build to package.json scripts and included it in check command. Updated doctor check to enforce pnpm check includes verify:build. Ran pnpm check clean. Status: done.
+- 2026-01-28: test suite expansion: added full coverage for assist server protocol (success flow, auth, configurable timeout). Modified server.js to support configurable timeout. Verified via pnpm check. Status: done.
