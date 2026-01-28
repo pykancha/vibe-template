@@ -10,9 +10,10 @@
     "dev:solo": "vite",
     "assist": "node src/devtools/server.js",
     "vibe:doctor": "node scripts/vibe-doctor.mjs",
+    "verify:build": "node scripts/verify-build.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "pnpm vibe:doctor && pnpm lint && pnpm test && pnpm build",
+    "check": "pnpm vibe:doctor && pnpm lint && pnpm test && pnpm build && pnpm verify:build",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

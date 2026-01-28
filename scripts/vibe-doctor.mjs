@@ -94,13 +94,13 @@ async function main() {
     if (typeof checkScript !== 'string') {
       fail('package.json must define scripts.check as a string')
     } else {
-      const requiredParts = ['pnpm vibe:doctor', 'pnpm lint', 'pnpm test', 'pnpm build']
+      const requiredParts = ['pnpm vibe:doctor', 'pnpm lint', 'pnpm test', 'pnpm build', 'pnpm verify:build']
       const missing = requiredParts.filter((p) => !checkScript.includes(p))
 
       if (missing.length > 0) {
         fail(`pnpm check must include: ${missing.join(', ')}`)
       } else {
-        pass('pnpm check includes doctor + lint + test + build')
+        pass('pnpm check includes doctor + lint + test + build + verify:build')
       }
     }
   } catch {
