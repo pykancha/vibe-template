@@ -75,6 +75,8 @@ function isOpen(client) {
 
 function sendJson(client, payload) {
   if (!isOpen(client)) return;
+  // Always attach protocol version to outgoing messages
+  if (!payload.v) payload.v = 1;
   client.send(JSON.stringify(payload));
 }
 
@@ -118,6 +120,9 @@ wss.on('connection', (ws, req) => {
   ws.on('message', (data) => {
     try {
       const msg = JSON.parse(data.toString());
+
+      // Add protocol version if missing for future compat
+      if (!msg.v) msg.v = 1;
 
       if (msg.type === 'context') {
         latestContext = msg.data;

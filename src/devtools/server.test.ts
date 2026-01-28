@@ -13,6 +13,7 @@ const BASE_PORT = 3005;
 const waitForOpen = (ws: WebSocket) => new Promise<void>((resolve) => ws.on('open', resolve));
 
 interface AssistMessage {
+  v: number;
   type: string;
   requestId?: string;
   command?: string;
@@ -88,10 +89,11 @@ describe('Assist Server Protocol', () => {
     await waitForOpen(ws);
 
     const requestId = 'req-no-client';
-    ws.send(JSON.stringify({ type: 'execute', command: 'test', requestId }));
+    ws.send(JSON.stringify({ v: 1, type: 'execute', command: 'test', requestId }));
 
     const response = await waitForMessage(ws, 'executeResult', requestId);
     // Verify response shape
+    expect(response.v).toBe(1);
     expect(response.result).toBeDefined();
     expect(response.result!.success).toBe(false);
     expect(response.result!.error).toContain('No app client connected');
@@ -105,7 +107,7 @@ describe('Assist Server Protocol', () => {
     await waitForOpen(appWs);
     
     // Register as app client
-    appWs.send(JSON.stringify({ type: 'context', data: { timestamp: Date.now() } }));
+    appWs.send(JSON.stringify({ v: 1, type: 'context', data: { timestamp: Date.now() } }));
 
     // 2. Connect Agent Client
     const agentWs = new WebSocket(WS_URL);
@@ -116,16 +118,18 @@ describe('Assist Server Protocol', () => {
     const payload = 'Buy Milk';
 
     // 3. Agent sends execute
-    agentWs.send(JSON.stringify({ type: 'execute', command, payload, requestId }));
+    agentWs.send(JSON.stringify({ v: 1, type: 'execute', command, payload, requestId }));
 
     // 4. App receives execute
     const appMsg = await waitForMessage(appWs, 'execute');
+    expect(appMsg.v).toBe(1);
     expect(appMsg.command).toBe(command);
     expect(appMsg.payload).toBe(payload);
     expect(appMsg.requestId).toBe(requestId);
 
     // 5. App sends result
     appWs.send(JSON.stringify({
+      v: 1,
       type: 'executeResult',
       requestId,
       result: { success: true, result: 'Added' }
@@ -133,6 +137,7 @@ describe('Assist Server Protocol', () => {
 
     // 6. Agent receives result
     const agentMsg = await waitForMessage(agentWs, 'executeResult', requestId);
+    expect(agentMsg.v).toBe(1);
     expect(agentMsg.result).toBeDefined();
     expect(agentMsg.result!.success).toBe(true);
     expect(agentMsg.result!.result).toBe('Added');
@@ -145,7 +150,7 @@ describe('Assist Server Protocol', () => {
     // 1. Connect App Client
     const appWs = new WebSocket(WS_URL);
     await waitForOpen(appWs);
-    appWs.send(JSON.stringify({ type: 'context', data: { timestamp: Date.now() } }));
+    appWs.send(JSON.stringify({ v: 1, type: 'context', data: { timestamp: Date.now() } }));
 
     // 2. Connect Agent Client
     const agentWs = new WebSocket(WS_URL);
@@ -154,7 +159,7 @@ describe('Assist Server Protocol', () => {
     const requestId = 'req-timeout';
     
     // 3. Agent sends execute
-    agentWs.send(JSON.stringify({ type: 'execute', command: 'freeze', requestId }));
+    agentWs.send(JSON.stringify({ v: 1, type: 'execute', command: 'freeze', requestId }));
 
     // 4. App receives it but does NOTHING (simulating hang)
     await waitForMessage(appWs, 'execute', requestId);

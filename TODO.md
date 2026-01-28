@@ -12,8 +12,16 @@
 - [x] **Navigation Commands**: Add `nav.current`, `nav.back`, `nav.forward` to registry.
 - [x] **Overlay UX**: Add connection status indicator (Connected/Disconnected badge) to the devtools overlay.
 - [x] **Doctor Checks**: Add checks for:
-    - [x] `cross-env` usage in scripts
-    - [x] Build purity (devtools tree-shaking)
+  - [x] `cross-env` usage in scripts
+  - [x] Build purity (devtools tree-shaking)
+  - [x] `verify:build` inclusion in check script
+
+## Maintenance
+
+- [x] **Testing**: Add tests for:
+  - [x] Assist Server Protocol (timeouts, auth, message routing)
+  - [x] Store Wrapper (state emission, command registration)
+  - [x] Build Verification (ensure devtools don't leak)
 
 ## Documentation
 
