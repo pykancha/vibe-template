@@ -486,6 +486,7 @@ The **highest priority remaining** items for “maximum compatibility + low fric
 - 2026-01-28: Final full verification pass (pnpm check). All invariants holding. Ready for use.
 - 2026-01-28: fix store-wrapper.test.ts to safely handle circular references during state serialization (Spec 10.1 robustness). Added simple try/catch fallback for serialization errors. Ran pnpm check clean. Status: done.
 - 2026-01-28: fix App.tsx demo fetch to use import.meta.env.BASE_URL (P1.3 compatibility). Added doctor check to enforce this. Ran pnpm check clean. Status: done.
+- 2026-01-28: add unit tests for devtools bus and console/network patching (verify observability). Verified via pnpm check. Status: done.
 
 ## Current Task
 - All tasks complete. Template is fully verified and compliant with SPEC.md.
