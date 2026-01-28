@@ -213,6 +213,21 @@ async function main() {
     }
   }
 
+  const ciWorkflow = await readTextOptional('.github/workflows/ci.yml')
+  if (ciWorkflow) {
+    const usesPnpmCheck = /run:\s*pnpm\s+check\b/.test(ciWorkflow)
+    if (!usesPnpmCheck) {
+      fail('CI workflow should run pnpm check')
+    } else {
+      pass('CI workflow runs pnpm check')
+    }
+  } else {
+    // Optional: could fail if we want to enforce CI, but let's just pass or warn
+    // Since this is a template, having it is better.
+    // fail('CI workflow (.github/workflows/ci.yml) missing')
+    // For now, let's just log if it exists.
+  }
+
   const hasBaseAwareFetch = /import\.meta\.env\.BASE_URL/.test(appTsx)
   if (!hasBaseAwareFetch) {
     fail('App.tsx demo fetch should use import.meta.env.BASE_URL')
