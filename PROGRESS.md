@@ -483,6 +483,7 @@ The **highest priority remaining** items for “maximum compatibility + low fric
 - 2026-01-28: final spec alignment (Spec 13.2): updated AGENTS.md to include explicit Invariants Summary and Preferred Skill Stack. Ran pnpm check clean. Status: done.
 - 2026-01-28: protocol versioning alignment: updated `client.ts` to include `v: 1` in all outgoing messages (executeResult, context, commands, events) to match server expectation. Added doctor check to enforce this. Ran pnpm check clean. Status: done.
 - 2026-01-28: Verify production build artifact uses relative paths (Static First invariant). Updating verify-build.mjs to enforce this. Status: done.
+- 2026-01-28: Enhanced build verification: added stricter checks to verify-build.mjs to ensure 'DevAssistant', 'connectAssist', and 'DevToolsOverlay' are tree-shaken from production. Verified via pnpm check. Status: done.
 - 2026-01-28: Final full verification pass (pnpm check). All invariants holding. Ready for use.
 - 2026-01-28: fix store-wrapper.test.ts to safely handle circular references during state serialization (Spec 10.1 robustness). Added simple try/catch fallback for serialization errors. Ran pnpm check clean. Status: done.
 - 2026-01-28: fix App.tsx demo fetch to use import.meta.env.BASE_URL (P1.3 compatibility). Added doctor check to enforce this. Ran pnpm check clean. Status: done.

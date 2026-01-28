@@ -43,10 +43,24 @@ async function main() {
       console.error(`FAIL: "CommandRegistry" found in ${file}`);
       failed = true;
     }
+
+    // Check for DevAssistant component usage
+    if (content.includes('DevAssistant')) {
+      console.error(`FAIL: "DevAssistant" found in ${file}`);
+      failed = true;
+    }
+
+    // Check for connectAssist function
+    if (content.includes('connectAssist')) {
+      console.error(`FAIL: "connectAssist" found in ${file}`);
+      failed = true;
+    }
     
-    // Check for DevAssistant component usage (though likely minified/renamed, strings might remain)
-    // The class names are better indicators of logic leakage.
-    // We can also check for specific strings from server.js if it leaked (unlikely if not imported)
+    // Check for DevToolsOverlay usage
+    if (content.includes('DevToolsOverlay')) {
+      console.error(`FAIL: "DevToolsOverlay" found in ${file}`);
+      failed = true;
+    }
   }
 
   if (failed) {
