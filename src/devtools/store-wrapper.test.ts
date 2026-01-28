@@ -82,6 +82,9 @@ describe('createVibeStore', () => {
 
   it('handles circular references safely', () => {
     vi.useFakeTimers();
+    // Silence expected warning
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const circular: any = { val: 1 };
     circular.self = circular;
@@ -97,6 +100,10 @@ describe('createVibeStore', () => {
         useStore.getState().update();
         vi.runAllTimers();
     }).not.toThrow();
+
+    // Verify warning was logged
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to serialize state'), expect.any(Error));
+    consoleSpy.mockRestore();
 
     // The emitted event should contain a safe version
     const calls = vi.mocked(bus.emit).mock.calls;

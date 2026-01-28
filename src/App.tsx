@@ -122,7 +122,12 @@ function Home() {
             Error
           </button>
           <button
-            onClick={() => fetch(`${import.meta.env.BASE_URL}api/test`).catch(() => {})}
+            onClick={() => {
+              const base = import.meta.env.BASE_URL.endsWith('/')
+                ? import.meta.env.BASE_URL
+                : `${import.meta.env.BASE_URL}/`
+              fetch(`${base}api/test`).catch(() => {})
+            }}
             className="px-3 py-1 bg-purple-700 rounded hover:bg-purple-600 transition"
           >
             Fetch

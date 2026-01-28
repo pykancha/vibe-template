@@ -36,10 +36,11 @@ async function main() {
   const packageJsonText = await readText('package.json')
   const viteConfig = await readText('vite.config.ts')
   const indexHtml = await readText('index.html')
+  const appTsx = await readText('src/App.tsx')
   const assistServer = await readText('src/devtools/server.js')
   const store = await readText('src/store/index.ts')
 
-  if (!templateInvariants || !packageJsonText || !viteConfig || !indexHtml || !assistServer || !store) return
+  if (!templateInvariants || !packageJsonText || !viteConfig || !indexHtml || !assistServer || !store || !appTsx) return
 
   const agentBrowserSkill = await readText('.agent/skills/agent-browser/SKILL.md')
   if (!agentBrowserSkill) return
@@ -210,6 +211,13 @@ async function main() {
     } else {
       pass('deploy workflow runs pnpm check')
     }
+  }
+
+  const hasBaseAwareFetch = /import\.meta\.env\.BASE_URL/.test(appTsx)
+  if (!hasBaseAwareFetch) {
+    fail('App.tsx demo fetch should use import.meta.env.BASE_URL')
+  } else {
+    pass('App.tsx demo fetch uses BASE_URL')
   }
 
   if (process.exitCode) {

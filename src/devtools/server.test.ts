@@ -146,6 +146,47 @@ describe('Assist Server Protocol', () => {
     agentWs.close();
   });
 
+  it('should route commands to the most recently active app client', async () => {
+    // 1. Connect App Client 1
+    const app1 = new WebSocket(WS_URL);
+    await waitForOpen(app1);
+    app1.send(JSON.stringify({ v: 1, type: 'context', data: { timestamp: 100 } }));
+
+    // 2. Connect App Client 2
+    const app2 = new WebSocket(WS_URL);
+    await waitForOpen(app2);
+    app2.send(JSON.stringify({ v: 1, type: 'context', data: { timestamp: 200 } }));
+
+    // 3. Connect Agent
+    const agent = new WebSocket(WS_URL);
+    await waitForOpen(agent);
+
+    // 4. Agent sends execute -> Should go to App 2 (latest)
+    const req1 = 'req-app2';
+    agent.send(JSON.stringify({ v: 1, type: 'execute', command: 'cmd1', requestId: req1 }));
+
+    const msg1 = await waitForMessage(app2, 'execute', req1);
+    expect(msg1.command).toBe('cmd1');
+
+    // Respond to clear pending
+    app2.send(JSON.stringify({ v: 1, type: 'executeResult', requestId: req1, result: { success: true } }));
+    await waitForMessage(agent, 'executeResult', req1);
+
+    // 5. App 1 becomes active
+    app1.send(JSON.stringify({ v: 1, type: 'context', data: { timestamp: 300 } }));
+    
+    // 6. Agent sends execute -> Should go to App 1 now
+    const req2 = 'req-app1';
+    agent.send(JSON.stringify({ v: 1, type: 'execute', command: 'cmd2', requestId: req2 }));
+
+    const msg2 = await waitForMessage(app1, 'execute', req2);
+    expect(msg2.command).toBe('cmd2');
+
+    app1.close();
+    app2.close();
+    agent.close();
+  });
+
   it('should timeout if app client does not respond', async () => {
     // 1. Connect App Client
     const appWs = new WebSocket(WS_URL);
