@@ -79,4 +79,35 @@ describe('createVibeStore', () => {
     await commands.execute('test4.reset');
     expect(useStore.getState().count).toBe(10); // Resets to initial
   });
+
+  it('handles circular references safely', () => {
+    vi.useFakeTimers();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const circular: any = { val: 1 };
+    circular.self = circular;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const useStore = createVibeStore<any>((set) => ({
+      data: circular,
+      update: () => set({ data: { ...circular, updated: true } }),
+    }), { name: 'test-circular', throttleMs: 0 });
+
+    // Should not throw when emitting state
+    expect(() => {
+        useStore.getState().update();
+        vi.runAllTimers();
+    }).not.toThrow();
+
+    // The emitted event should contain a safe version
+    const calls = vi.mocked(bus.emit).mock.calls;
+    const stateEvents = calls.filter(c => c[0] === 'state');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const lastEvent = stateEvents[stateEvents.length - 1][1] as any;
+    
+    expect(lastEvent.name).toBe('test-circular');
+    // We expect the circular reference to be handled (e.g. removed or stringified safely)
+    expect(() => JSON.stringify(lastEvent.data)).not.toThrow();
+
+    vi.useRealTimers();
+  });
 });

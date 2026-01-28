@@ -30,11 +30,20 @@ export function createVibeStore<T extends object>(
         const now = Date.now();
         if (now - lastEmit > throttleMs) {
           lastEmit = now;
-          // Strip functions
-          const serializable = Object.fromEntries(
-            Object.entries(state).filter(([, v]) => typeof v !== 'function')
-          );
-          bus.emit('state', { name, data: serializable });
+          // Strip functions and handle circular references
+          try {
+            const cleanState = JSON.parse(JSON.stringify(
+                Object.fromEntries(
+                    Object.entries(state).filter(([, v]) => typeof v !== 'function')
+                )
+            ));
+             bus.emit('state', { name, data: cleanState });
+          } catch (e) {
+             // Fallback for circular refs if simple stringify fails
+             // We can use a simpler approach: just don't emit deeply circular stuff or warn
+             console.warn(`[vibe] Failed to serialize state for ${name}`, e);
+             bus.emit('state', { name, data: { error: 'State serialization failed (circular?)' } });
+          }
         }
       });
     }
@@ -45,10 +54,15 @@ export function createVibeStore<T extends object>(
       
       commands.register(`${name}.getState`, `Get snapshot of ${name} store`, () => {
         const state = store.getState();
-        const serializable = Object.fromEntries(
-          Object.entries(state).filter(([, v]) => typeof v !== 'function')
-        );
-        return serializable;
+        try {
+            return JSON.parse(JSON.stringify(
+                Object.fromEntries(
+                    Object.entries(state).filter(([, v]) => typeof v !== 'function')
+                )
+            ));
+        } catch {
+            return { error: 'State serialization failed' };
+        }
       });
 
       commands.register(`${name}.setState`, `Set partial state for ${name}`, (payload) => {
