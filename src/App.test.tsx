@@ -33,3 +33,24 @@ test('can add and toggle a todo', async () => {
   expect(todo).toBeChecked()
   expect(screen.getByText('Buy milk')).toHaveClass('line-through')
 })
+
+test('theme toggle is accessible and updates label', async () => {
+  const user = userEvent.setup()
+
+  render(
+    <HashRouter>
+      <App />
+    </HashRouter>,
+  )
+
+  // Default is dark mode, so button should say "dark" and offer switch to "light"
+  const button = screen.getByRole('button', { name: /switch to light mode/i })
+  expect(button).toBeInTheDocument()
+  expect(button).toHaveTextContent('dark')
+
+  await user.click(button)
+
+  // Now it should be light mode
+  expect(button).toHaveTextContent('light')
+  expect(button).toHaveAttribute('aria-label', 'Switch to dark mode')
+})
