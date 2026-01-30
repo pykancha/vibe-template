@@ -152,10 +152,16 @@ describe('Assist Server Protocol', () => {
     await waitForOpen(app1);
     app1.send(JSON.stringify({ v: 1, type: 'context', data: { timestamp: 100 } }));
 
+    // Allow server to process the context message
+    await new Promise((r) => setTimeout(r, 50));
+
     // 2. Connect App Client 2
     const app2 = new WebSocket(WS_URL);
     await waitForOpen(app2);
     app2.send(JSON.stringify({ v: 1, type: 'context', data: { timestamp: 200 } }));
+
+    // Allow server to process the context message
+    await new Promise((r) => setTimeout(r, 50));
 
     // 3. Connect Agent
     const agent = new WebSocket(WS_URL);
@@ -173,7 +179,11 @@ describe('Assist Server Protocol', () => {
     await waitForMessage(agent, 'executeResult', req1);
 
     // 5. App 1 becomes active
-    app1.send(JSON.stringify({ v: 1, type: 'context', data: { timestamp: 300 } }));
+    await new Promise((r) => setTimeout(r, 10)); // Ensure timestamp differs
+    app1.send(JSON.stringify({ v: 1, type: 'context', data: { timestamp: Date.now() } }));
+    
+    // Allow server to process the context message
+    await new Promise((r) => setTimeout(r, 50));
     
     // 6. Agent sends execute -> Should go to App 1 now
     const req2 = 'req-app1';

@@ -6,6 +6,10 @@ interface VibeStoreOptions {
   name: string;
   emitState?: boolean;
   registerCommands?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  serialize?: (state: any) => any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  redact?: (data: any) => any;
   throttleMs?: number;
 }
 
@@ -20,7 +24,28 @@ export function createVibeStore<T extends object>(
   options: VibeStoreOptions
 ) {
   const store = createZustand<T>(initializer);
-  const { name, emitState = true, registerCommands = true, throttleMs = 200 } = options;
+  const { 
+    name, 
+    emitState = true, 
+    registerCommands = true, 
+    throttleMs = 200,
+    serialize,
+    redact
+  } = options;
+
+  // Default serializer: strip functions and deep clone to ensure JSON safety
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const defaultSerialize = (state: any) => {
+    return JSON.parse(JSON.stringify(
+      Object.fromEntries(
+        Object.entries(state).filter(([, v]) => typeof v !== 'function')
+      )
+    ));
+  };
+
+  const effectiveSerialize = serialize ?? defaultSerialize;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const effectiveRedact = redact ?? ((d: any) => d);
 
   if (import.meta.env.DEV) {
     // 1. Auto-emit state
@@ -30,19 +55,13 @@ export function createVibeStore<T extends object>(
         const now = Date.now();
         if (now - lastEmit > throttleMs) {
           lastEmit = now;
-          // Strip functions and handle circular references
           try {
-            const cleanState = JSON.parse(JSON.stringify(
-                Object.fromEntries(
-                    Object.entries(state).filter(([, v]) => typeof v !== 'function')
-                )
-            ));
-             bus.emit('state', { name, data: cleanState });
+            const cleanState = effectiveSerialize(state);
+            const finalState = effectiveRedact(cleanState);
+            bus.emit('state', { name, data: finalState });
           } catch (e) {
-             // Fallback for circular refs if simple stringify fails
-             // We can use a simpler approach: just don't emit deeply circular stuff or warn
              console.warn(`[vibe] Failed to serialize state for ${name}`, e);
-             bus.emit('state', { name, data: { error: 'State serialization failed (circular?)' } });
+             bus.emit('state', { name, data: { error: 'State serialization failed' } });
           }
         }
       });
@@ -55,11 +74,8 @@ export function createVibeStore<T extends object>(
       commands.register(`${name}.getState`, `Get snapshot of ${name} store`, () => {
         const state = store.getState();
         try {
-            return JSON.parse(JSON.stringify(
-                Object.fromEntries(
-                    Object.entries(state).filter(([, v]) => typeof v !== 'function')
-                )
-            ));
+            const cleanState = effectiveSerialize(state);
+            return effectiveRedact(cleanState);
         } catch {
             return { error: 'State serialization failed' };
         }

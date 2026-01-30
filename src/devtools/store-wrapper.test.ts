@@ -105,15 +105,20 @@ describe('createVibeStore', () => {
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to serialize state'), expect.any(Error));
     consoleSpy.mockRestore();
 
-    // The emitted event should contain a safe version
+    // The emitted event should contain a safe version or error
     const calls = vi.mocked(bus.emit).mock.calls;
     const stateEvents = calls.filter(c => c[0] === 'state');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const lastEvent = stateEvents[stateEvents.length - 1][1] as any;
     
     expect(lastEvent.name).toBe('test-circular');
-    // We expect the circular reference to be handled (e.g. removed or stringified safely)
+    // We expect an error object in data, or at least JSON-safe data
     expect(() => JSON.stringify(lastEvent.data)).not.toThrow();
+    
+    // In our implementation, we emit { error: ... } on failure
+    if (lastEvent.data.error) {
+        expect(lastEvent.data.error).toBe('State serialization failed');
+    }
 
     vi.useRealTimers();
   });

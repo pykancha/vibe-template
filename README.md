@@ -28,10 +28,27 @@ pnpm dev
 ```
 
 This starts:
+
 - App at `http://localhost:5173`
 - Assist API at `http://localhost:3001` (for agents)
 
-### 3. Deploy
+### 3. Verify
+
+Before committing, run the full verification suite:
+
+```bash
+pnpm check
+```
+
+This runs:
+
+- **Doctor**: Checks template invariants
+- **Lint**: ESLint
+- **Test**: Vitest
+- **Build**: Production build
+- **Verify**: Ensures no devtools leaked into production
+
+### 4. Deploy
 
 1. Push to GitHub.
 2. Go to **Settings > Pages**.
@@ -41,25 +58,33 @@ This starts:
 ## Troubleshooting
 
 ### "Command not found: agent-browser"
+
 If you see this when trying to use agent-browser:
+
 ```bash
 npm install -g agent-browser
 agent-browser install
 ```
 
 ### GitHub Pages 404s
+
 If your site loads but routes are broken:
+
 - Ensure you are using `HashRouter` (default in this template).
 - If using custom domain, verify CNAME settings.
 
 ### Assist Connection Failed
+
 If the devtools overlay says "Disconnected":
+
 - Check if `pnpm assist` or `pnpm dev` is running.
 - If running in Codespaces/Remote, ensure port 3001 is forwarded.
 - If running on https, ensure you are using `wss://` (handled automatically by default).
 
 ### Windows Script Errors
+
 If `pnpm dev` fails on Windows:
+
 - Ensure you have `cross-env` installed (included in devDependencies).
 - The template uses `cross-env` to set `VITE_ASSIST=1` safely across platforms.
 

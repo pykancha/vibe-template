@@ -123,6 +123,7 @@ function Home() {
           </button>
           <button
             onClick={() => {
+              // Ensure base ends with /
               const base = import.meta.env.BASE_URL.endsWith('/')
                 ? import.meta.env.BASE_URL
                 : `${import.meta.env.BASE_URL}/`
